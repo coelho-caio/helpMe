@@ -1,77 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".Register">
 
-   <!-- <ImageView
-            android:layout_width="220dp"
-            android:layout_height="200dp"
-            android:layout_marginTop="20dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-    />-->
+    <!-- <ImageView
+             android:layout_width="220dp"
+             android:layout_height="200dp"
+             android:layout_marginTop="20dp"
+             app:layout_constraintTop_toTopOf="parent"
+             app:layout_constraintStart_toStartOf="parent"
+             app:layout_constraintEnd_toEndOf="parent"
+     />-->
 
     <EditText
             android:id="@+id/tt_register_name"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
-            android:hint="Enter with your name"
-            android:layout_marginTop="30dp"
             android:layout_marginStart="20dp"
-            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="30dp"
+            android:hint="Digite seu nome"
+            android:inputType="textCapWords"
             app:layout_constraintStart_toStartOf="parent"
-    />
+            app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
             android:id="@+id/et_register_email"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
-            android:hint="Email"
             android:layout_marginTop="10dp"
-            app:layout_constraintTop_toBottomOf="@+id/tt_register_name"
+            android:hint="E-mail"
+            android:inputType="textEmailAddress"
             app:layout_constraintStart_toStartOf="@+id/tt_register_name"
-    />
+            app:layout_constraintTop_toBottomOf="@+id/tt_register_name" />
+
     <EditText
             android:id="@+id/et_register_password"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
-            android:hint="Password"
             android:layout_marginTop="10dp"
-            app:layout_constraintTop_toBottomOf="@+id/et_register_email"
+            android:hint="Senha"
+            android:inputType="textPassword"
             app:layout_constraintStart_toStartOf="@+id/et_register_email"
-    />
+            app:layout_constraintTop_toBottomOf="@+id/et_register_email" />
+
     <EditText
             android:id="@+id/et_register_password_confirmation"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
-            android:hint="Confirm your Password"
             android:layout_marginTop="10dp"
-            app:layout_constraintTop_toBottomOf="@+id/et_register_password"
+            android:hint="Confirmação de Senha"
+            android:inputType="textPassword"
             app:layout_constraintStart_toStartOf="@+id/et_register_password"
-    />
+            app:layout_constraintTop_toBottomOf="@+id/et_register_password" />
+
     <EditText
             android:id="@+id/tt_register_tel"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
-            android:hint="Phone"
             android:layout_marginTop="10dp"
-            app:layout_constraintTop_toBottomOf="@+id/et_register_password_confirmation"
+            android:hint="Telefone"
+            android:inputType="phone"
             app:layout_constraintStart_toStartOf="@+id/et_register_password_confirmation"
-    />
+            app:layout_constraintTop_toBottomOf="@+id/et_register_password_confirmation" />
 
     <Button
             android:id="@+id/bt_register"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            app:layout_constraintTop_toBottomOf="@+id/tt_register_tel"
+            android:text="registre-se"
             app:layout_constraintStart_toStartOf="@id/tt_register_tel"
-            android:text="registre-se"/>
+            app:layout_constraintTop_toBottomOf="@+id/tt_register_tel" />
 
 
 </android.support.constraint.ConstraintLayout>

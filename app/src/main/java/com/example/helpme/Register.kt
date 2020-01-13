@@ -1,11 +1,12 @@
 package com.example.helpme
 
+import UserDatabase
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import com.example.helpme.Database.LoginDataBaseHelper
+import com.example.helpme.model.User
 
 class Register : AppCompatActivity() {
 
@@ -48,12 +49,13 @@ class Register : AppCompatActivity() {
             if (password != passwordConfirmation) {
                 Toast.makeText(this, "As senhas são diferentes", Toast.LENGTH_LONG).show()
             } else {
-                val dbHelper = LoginDataBaseHelper(this)
+                val dbHelper = UserDatabase(this)
                 if (dbHelper.readEmail(email)){
                     Toast.makeText(this, "Email existente", Toast.LENGTH_LONG).show()
                 }else{
-                    val insert = dbHelper.insert(email,password)
-                    if (insert ==true){
+                    val user = User(email,password)
+                    val insert = dbHelper.insert(user)
+                    if (insert){
                         Toast.makeText(this, "Registro realizado com sucesso", Toast.LENGTH_LONG).show()
                     }
 

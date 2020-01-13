@@ -1,22 +1,21 @@
 package com.example.helpme
 
+import UserDatabase
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import com.example.helpme.Database.LoginDataBaseHelper
+import com.example.helpme.ui.activity.MainActivity
+import kotlinx.android.synthetic.main.activity_login.*
 
 class Login : AppCompatActivity() {
 
     lateinit var btLogin: Button
-
     lateinit var btRegister: Button
-
-    lateinit var etName:EditText
-
-    lateinit var etPassword:EditText
+    lateinit var etEmailLogin: EditText
+    lateinit var etPassword: EditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,21 +26,20 @@ class Login : AppCompatActivity() {
     }
 
     private fun initViews() {
-        btLogin=findViewById(R.id.bt_login_sign_in)
-        etName = findViewById(R.id.et_login_name)
-        etPassword = findViewById(R.id.et_login_password)
-        btRegister= findViewById(R.id.bt_login_register)
+        btLogin = bt_login_sign_in
+        etEmailLogin = et_login_email
+        etPassword = et_login_password
+        btRegister = bt_login_register
     }
 
-    fun setupListener(){
+    fun setupListener() {
         btLogin.setOnClickListener {
-            val db = LoginDataBaseHelper(this)
-            if ( db.readEmail(etName.text.toString()) && db.readPassword(etPassword.text.toString())) {
+            val db = UserDatabase(this)
+            if (db.readEmail(etEmailLogin.text.toString()) && db.readPassword(etPassword.text.toString())) {
                 val intent = Intent(this, MainActivity::class.java)
                 startActivity(intent)
-            }
-            else{
-                Toast.makeText(this,"errrrrrrou", Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(this, "errrrrrrou", Toast.LENGTH_LONG).show()
             }
         }
 
