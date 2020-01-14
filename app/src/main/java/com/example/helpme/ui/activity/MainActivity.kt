@@ -3,6 +3,7 @@ package com.example.helpme.ui.activity
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.widget.Toast
 import com.example.helpme.Database.DatabaseHelpMe.DBHelpMe.COLUMN_EMAIL
 import com.example.helpme.Database.DatabaseHelpMe.DBHelpMe.COLUMN_NAME
 import com.example.helpme.Database.DatabaseHelpMe.DBHelpMe.COLUMN_PHONE
@@ -19,8 +20,6 @@ class MainActivity : AppCompatActivity() {
 
     private val dependents: MutableList<Dependent> = mutableListOf()
 
-    private val dependent: Dependent = Dependent("Thales", "thales@gmail.com", "11977973346", 1)
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -28,15 +27,6 @@ class MainActivity : AppCompatActivity() {
 
         val dbDependent = DependentDatabase(this)
         val cursor = dbDependent.getAllDependent()
-
-        dbDependent.insert(dependent)
-        if (cursor != null) {
-            val name = (cursor.getString(cursor.getColumnIndex(COLUMN_NAME)))
-            val email = (cursor.getString(cursor.getColumnIndex(COLUMN_EMAIL)))
-            val phone = (cursor.getString(cursor.getColumnIndex(COLUMN_PHONE)))
-            val userId = (cursor.getInt(cursor.getColumnIndex(COLUMN_USER)))
-            dependents.add(Dependent(name, email, phone, userId))
-        }
         cursor!!.moveToFirst()
         while (cursor.moveToNext()) {
 
@@ -57,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun configuraLista(dependents: List<Dependent>) {
+    private fun configuraLista(dependents: MutableList<Dependent>) {
 //        lista_usuario_recyclerView.layoutManager = LinearLayoutManager(this)
 //        lista_usuario_recyclerView.adapter = RecyclerAdapter(usuarios)
         lista_usuarios_listview.adapter = ListDependentAdapter(dependents, this)

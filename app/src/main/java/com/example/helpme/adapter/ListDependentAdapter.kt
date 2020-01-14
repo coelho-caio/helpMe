@@ -10,7 +10,7 @@ import com.example.helpme.model.Dependent
 import kotlinx.android.synthetic.main.item_usuario.view.*
 
 class ListDependentAdapter(
-    private val dependents: List<Dependent>,
+    private val dependents: MutableList<Dependent>,
     private val context: Context
 ) : BaseAdapter() {
 

@@ -1,8 +1,10 @@
 package com.example.helpme.ui.activity
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
+import com.example.helpme.Database.DependentDatabase
 import com.example.helpme.R
 import com.example.helpme.model.Dependent
 import kotlinx.android.synthetic.main.formulario_usuario.*
@@ -13,15 +15,18 @@ class FormActivity : AppCompatActivity(){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.formulario_usuario)
 
-
         botao_salvar_usuario.setOnClickListener {
-
             val email = form_usuario_email.text.toString()
             val name = form_usuario_nome.text.toString()
             val phone = form_usuario_telefone.text.toString()
             val dependent = Dependent(name, email, phone, 1)
-            dependents.add(dependent)
-            Toast.makeText(this, email, Toast.LENGTH_SHORT).show()
+
+
+            val dbDependent = DependentDatabase(this)
+            dbDependent.insert(dependent)
+
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
         }
     }
 }
