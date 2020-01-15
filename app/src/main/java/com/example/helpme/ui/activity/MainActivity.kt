@@ -1,8 +1,14 @@
 package com.example.helpme.ui.activity
 
+import android.content.Context
 import android.content.Intent
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.widget.Toast
 import com.example.helpme.Database.DatabaseHelpMe.DBHelpMe.COLUMN_EMAIL
 import com.example.helpme.Database.DatabaseHelpMe.DBHelpMe.COLUMN_NAME
@@ -15,10 +21,12 @@ import com.example.helpme.model.Dependent
 import kotlinx.android.synthetic.main.activity_main.*
 
 
-class MainActivity : AppCompatActivity() {
-
+class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private val dependents: MutableList<Dependent> = mutableListOf()
+
+    private lateinit var sensorManager: SensorManager
+    lateinit var acelerometer: Sensor
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +46,12 @@ class MainActivity : AppCompatActivity() {
         }
         cursor.close()
         configuraLista(dependents)
+
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+
+        acelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+
+        sensorManager.registerListener(this, acelerometer, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
     private fun configuraBotaoAdicionar() {
@@ -53,4 +67,13 @@ class MainActivity : AppCompatActivity() {
         lista_usuarios_listview.adapter = ListDependentAdapter(dependents, this)
 
     }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+    }
+
+    override fun onSensorChanged(event: SensorEvent?) {
+        if (event!=null)
+        Log.d("SensorChange", "${event.values[1]}")
+    }
+
 }
