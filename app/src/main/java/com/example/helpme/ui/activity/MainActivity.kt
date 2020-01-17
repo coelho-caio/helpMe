@@ -1,13 +1,19 @@
 package com.example.helpme.ui.activity
 
+import android.Manifest.permission.SEND_SMS
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
+import android.provider.Telephony
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
+import android.telephony.SmsManager
 import android.util.Log
 import android.widget.Toast
 import com.example.helpme.Database.DatabaseHelpMe.DBHelpMe.COLUMN_EMAIL
@@ -19,9 +25,12 @@ import com.example.helpme.R
 import com.example.helpme.adapter.ListDependentAdapter
 import com.example.helpme.model.Dependent
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.jar.Manifest
 
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
+
+    private val MY_PERMISSIONS_REQUEST_SEND_SMS:Int=0
 
     private val dependents: MutableList<Dependent> = mutableListOf()
 
@@ -74,6 +83,48 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun onSensorChanged(event: SensorEvent?) {
         if (event!=null)
         Log.d("SensorChange", "${event.values[1]}")
+        if (event != null) {
+            if (event.values[1]>5)
+                sendMessage()
+        }
     }
 
-}
+    fun sendMessage(){
+        if (ContextCompat.checkSelfPermission(this, SEND_SMS)!= PackageManager.PERMISSION_GRANTED){
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    SEND_SMS)) {
+
+            }else{
+                ActivityCompat.requestPermissions(this, arrayOf(SEND_SMS),MY_PERMISSIONS_REQUEST_SEND_SMS)
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        when (requestCode) {
+            MY_PERMISSIONS_REQUEST_SEND_SMS -> {
+                // If request is cancelled, the result arrays are empty.
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    val smsManager= SmsManager.getDefault()
+                    smsManager.sendTextMessage("11982761227",null, "testando o app", null, null)
+                    smsManager.sendTextMessage("11977973346",null, "Vamos passar nessa bagaça", null, null)
+
+                } else {
+                    Log.w("SMS Error", "Errrrrrou")
+                }
+                return
+            }
+
+            // Add other 'when' lines to check for other
+            // permissions this app might request.
+            else -> {
+                // Ignore all other requests.
+            }
+        }
+    }
+    }
+
