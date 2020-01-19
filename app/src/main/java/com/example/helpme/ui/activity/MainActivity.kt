@@ -9,23 +9,21 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
-import android.provider.Telephony
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
 import android.telephony.SmsManager
 import android.util.Log
-import android.widget.Toast
 import com.example.helpme.Database.DatabaseHelpMe.DBHelpMe.COLUMN_EMAIL
 import com.example.helpme.Database.DatabaseHelpMe.DBHelpMe.COLUMN_NAME
 import com.example.helpme.Database.DatabaseHelpMe.DBHelpMe.COLUMN_PHONE
 import com.example.helpme.Database.DatabaseHelpMe.DBHelpMe.COLUMN_USER
 import com.example.helpme.Database.DependentDatabase
 import com.example.helpme.R
-import com.example.helpme.adapter.ListDependentAdapter
+import com.example.helpme.adapter.RecyclerAdapter
 import com.example.helpme.model.Dependent
 import kotlinx.android.synthetic.main.activity_main.*
-import java.util.jar.Manifest
 
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
@@ -71,9 +69,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun configuraLista(dependents: MutableList<Dependent>) {
-//        lista_usuario_recyclerView.layoutManager = LinearLayoutManager(this)
-//        lista_usuario_recyclerView.adapter = RecyclerAdapter(usuarios)
-        lista_usuarios_listview.adapter = ListDependentAdapter(dependents, this)
+        lista_usuario_recyclerView.layoutManager = LinearLayoutManager(this)
+        lista_usuario_recyclerView.adapter = RecyclerAdapter(dependents)
 
     }
 
