@@ -12,7 +12,6 @@ import android.hardware.SensorManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
-import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
@@ -33,7 +32,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
-    private val MY_PERMISSIONS_REQUEST_SEND_SMS:Int=21
+    private val MY_PERMISSIONS:Int=21
     private val MY_PERMISSION_REQUEST_COARSE_LOCATION:Int=22
     private val MY_PERMISSION_REQUEST_ACCESS_FINE_LOCATION :Int=23
 
@@ -47,6 +46,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private lateinit var sensorManager: SensorManager
     lateinit var acelerometer: Sensor
+    private val permissions = arrayOf(SEND_SMS, ACCESS_COARSE_LOCATION,
+        ACCESS_FINE_LOCATION)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -125,12 +126,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     fun sendMessage(){
-        if (ContextCompat.checkSelfPermission(this, SEND_SMS)!= PackageManager.PERMISSION_GRANTED){
+        if (ContextCompat.checkSelfPermission(this, permissions.toString())!= PackageManager.PERMISSION_GRANTED){
             if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    SEND_SMS)) {
+                    permissions.toString()
+                )) {
 
             }else{
-                ActivityCompat.requestPermissions(this, arrayOf(SEND_SMS),MY_PERMISSIONS_REQUEST_SEND_SMS)
+                ActivityCompat.requestPermissions(this, permissions,MY_PERMISSIONS)
             }
         }
     }
@@ -141,7 +143,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         grantResults: IntArray
     ) {
         when (requestCode) {
-            MY_PERMISSIONS_REQUEST_SEND_SMS -> {
+            MY_PERMISSIONS -> {
                 // If request is cancelled, the result arrays are empty.
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     val smsManager= SmsManager.getDefault()
