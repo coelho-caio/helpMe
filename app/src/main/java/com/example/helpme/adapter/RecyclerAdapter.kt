@@ -1,5 +1,6 @@
 package com.example.helpme.adapter
 
+import android.content.Context
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -9,7 +10,7 @@ import com.example.helpme.model.Dependent
 import kotlinx.android.synthetic.main.item_usuario.view.*
 
 
-class RecyclerAdapter(private val dependents: List<Dependent>) : RecyclerView.Adapter<CustomViewHolder>() {
+class RecyclerAdapter(private var dependents: MutableList<Dependent>) : RecyclerView.Adapter<CustomViewHolder>() {
 
     override fun getItemCount(): Int {
         return dependents.size
