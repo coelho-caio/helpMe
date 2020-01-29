@@ -1,6 +1,7 @@
 package com.example.helpme.ui.activity
 
-import android.Manifest.permission.SEND_SMS
+import android.Manifest.permission.*
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -8,6 +9,10 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
+import android.os.Build
 import android.os.Bundle
 import android.provider.Telephony
 import android.support.v4.app.ActivityCompat
@@ -30,7 +35,15 @@ import java.util.jar.Manifest
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
-    private val MY_PERMISSIONS_REQUEST_SEND_SMS:Int=0
+    private val MY_PERMISSIONS_REQUEST_SEND_SMS:Int=21
+    private val MY_PERMISSION_REQUEST_COARSE_LOCATION:Int=22
+    private val MY_PERMISSION_REQUEST_ACCESS_FINE_LOCATION :Int=23
+
+    private lateinit var locationManager:LocationManager
+    private lateinit var locationListener: LocationListener
+
+    private var latitude:Double? = 0.0
+    private var longitude:Double?=0.0
 
     private val dependents: MutableList<Dependent> = mutableListOf()
 
@@ -40,6 +53,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        setupView()
         configuraBotaoAdicionar()
 
         val dbDependent = DependentDatabase(this)
@@ -62,6 +76,30 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         sensorManager.registerListener(this, acelerometer, SensorManager.SENSOR_DELAY_NORMAL)
     }
+
+    @SuppressLint("MissingPermission")
+    private fun setupView() {
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        locationListener=object:LocationListener{
+            override fun onLocationChanged(location: Location?) {
+                latitude = location?.latitude
+                longitude = location?.longitude
+            }
+
+            override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
+
+            }
+
+            override fun onProviderEnabled(provider: String?) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onProviderDisabled(provider: String?) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+        }
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0f,locationListener)
+        }
 
     private fun configuraBotaoAdicionar() {
         botao_novo_usuario.setOnClickListener {
@@ -110,8 +148,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 // If request is cancelled, the result arrays are empty.
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     val smsManager= SmsManager.getDefault()
-                    smsManager.sendTextMessage("11982761227",null, "testando o app", null, null)
-                    smsManager.sendTextMessage("11977973346",null, "Vamos passar nessa bagaça", null, null)
+                    smsManager.sendTextMessage("11963125917",null, "testando o app $latitude $longitude ", null, null)
+                    smsManager.sendTextMessage("11977973346",null, "Vamos passar nessa bagaça $latitude $longitude", null, null)
 
                 } else {
                     Log.w("SMS Error", "Errrrrrou")
