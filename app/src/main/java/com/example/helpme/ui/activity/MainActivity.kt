@@ -122,7 +122,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         when (requestCode) {
             MY_PERMISSIONS -> {
                 // If request is cancelled, the result arrays are empty.
-
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
                     locationListener=object:LocationListener{
@@ -151,10 +150,22 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     )
                     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0f,locationListener)
 
-                    val smsManager= SmsManager.getDefault()
-                    smsManager.sendTextMessage("11963125917",null, "testando o app $latitude $longitude ", null, null)
-                    smsManager.sendTextMessage("11977973346",null, "Vamos passar nessa bagaça $latitude $longitude", null, null)
-
+                  Log.d("latitude", "$latitude")
+                        /*val smsManager = SmsManager.getDefault()
+                        smsManager.sendTextMessage(
+                            "11963125917",
+                            null,
+                            "testando o app $latitude $longitude ",
+                            null,
+                            null
+                        )
+                        smsManager.sendTextMessage(
+                            "11977973346",
+                            null,
+                            "Vamos passar nessa bagaça $latitude $longitude",
+                            null,
+                            null
+                        )*/
                 } else {
                     Log.w("SMS Error", "Errrrrrou")
                 }
