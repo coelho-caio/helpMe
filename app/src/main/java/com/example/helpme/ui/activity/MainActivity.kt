@@ -40,6 +40,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var locationManager:LocationManager
     private lateinit var locationListener: LocationListener
 
+    private var flag:Int = 0
+
     private var latitude:Double? = 0.0
     private var longitude:Double?=0.0
 
@@ -47,7 +49,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private lateinit var sensorManager: SensorManager
     lateinit var acelerometer: Sensor
-    private val permissions = arrayOf(SEND_SMS, ACCESS_COARSE_LOCATION,
+    private val permissions = arrayOf(
+        SEND_SMS,
         ACCESS_FINE_LOCATION)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -95,11 +98,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent?) {
         if (event!=null)
-        Log.d("SensorChange", "${event.values[1]}")
-        if (event != null) {
-            if (event.values[1]>5)
+       // Log.d("SensorChange", "${event.values[1]}")
+            if (event.values[1]>2.toFloat())
+                Log.d("sensor", "${event.values[1]}")
                 sendMessage()
-        }
+               // flag  = true
     }
 
     fun sendMessage(){
@@ -126,8 +129,28 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
                     locationListener=object:LocationListener{
                         override fun onLocationChanged(location: Location?) {
-                            latitude = location?.latitude
-                            longitude = location?.longitude
+                            if (flag<10){
+                                latitude = location?.latitude
+                                Log.d("minhavovo","$latitude")
+                                longitude = location?.longitude
+                                val smsManager = SmsManager.getDefault()
+                                smsManager.sendTextMessage(
+                                    "11963125917",
+                                    null,
+                                    "testando o app $latitude $longitude ",
+                                    null,
+                                    null
+                                )
+                                smsManager.sendTextMessage(
+                                    "11977973346",
+                                    null,
+                                    "Vamos passar nessa bagaça $latitude $longitude",
+                                    null,
+                                    null
+                                )
+                                flag++
+                            }
+
                         }
 
                         override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
@@ -151,21 +174,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0f,locationListener)
 
                   Log.d("latitude", "$latitude")
-                        /*val smsManager = SmsManager.getDefault()
-                        smsManager.sendTextMessage(
-                            "11963125917",
-                            null,
-                            "testando o app $latitude $longitude ",
-                            null,
-                            null
-                        )
-                        smsManager.sendTextMessage(
-                            "11977973346",
-                            null,
-                            "Vamos passar nessa bagaça $latitude $longitude",
-                            null,
-                            null
-                        )*/
+
                 } else {
                     Log.w("SMS Error", "Errrrrrou")
                 }
