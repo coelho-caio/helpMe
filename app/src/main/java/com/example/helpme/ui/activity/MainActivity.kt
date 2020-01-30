@@ -133,22 +133,24 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                                 latitude = location?.latitude
                                 Log.d("minhavovo","$latitude")
                                 longitude = location?.longitude
-                                val smsManager = SmsManager.getDefault()
-                                smsManager.sendTextMessage(
-                                    "11963125917",
-                                    null,
-                                    "testando o app $latitude $longitude ",
-                                    null,
-                                    null
-                                )
-                                smsManager.sendTextMessage(
-                                    "11977973346",
-                                    null,
-                                    "Vamos passar nessa bagaça $latitude $longitude",
-                                    null,
-                                    null
-                                )
-                                flag++
+                                if (!(latitude==0.0 || longitude ==0.0)) {
+                                    val smsManager = SmsManager.getDefault()
+                                    smsManager.sendTextMessage(
+                                        "11963125917",
+                                        null,
+                                        "testando o app $latitude $longitude ",
+                                        null,
+                                        null
+                                    )
+                                    smsManager.sendTextMessage(
+                                        "11977973346",
+                                        null,
+                                        "Vamos passar nessa bagaça $latitude $longitude",
+                                        null,
+                                        null
+                                    )
+                                    flag++
+                                }
                             }
 
                         }
