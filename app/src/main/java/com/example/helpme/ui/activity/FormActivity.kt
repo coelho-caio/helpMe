@@ -3,7 +3,6 @@ package com.example.helpme.ui.activity
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.widget.Toast
 import com.example.helpme.Database.DependentDatabase
 import com.example.helpme.R
 import com.example.helpme.model.Dependent
@@ -25,7 +24,7 @@ class FormActivity : AppCompatActivity(){
             val dbDependent = DependentDatabase(this)
             dbDependent.insert(dependent)
 
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, DashboardActivity::class.java)
             startActivity(intent)
         }
     }

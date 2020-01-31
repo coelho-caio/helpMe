@@ -31,7 +31,7 @@ import com.example.helpme.model.Dependent
 import kotlinx.android.synthetic.main.activity_main.*
 
 
-class MainActivity : AppCompatActivity(), SensorEventListener {
+class DashboardActivity : AppCompatActivity(), SensorEventListener {
 
     private val MY_PERMISSIONS:Int=21
     private val MY_PERMISSION_REQUEST_COARSE_LOCATION:Int=22
@@ -45,7 +45,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private var latitude:Double? = 0.0
     private var longitude:Double?=0.0
 
-    private val dependents: MutableList<Dependent> = mutableListOf()
+    private var dependents: MutableList<Dependent> = mutableListOf()
+
+    val repository: DashboardRepository= DashboardRepository()
 
     private lateinit var sensorManager: SensorManager
     lateinit var acelerometer: Sensor
@@ -58,18 +60,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         setContentView(R.layout.activity_main)
         configuraBotaoAdicionar()
 
-        val dbDependent = DependentDatabase(this)
-        val cursor = dbDependent.getAllDependent()
-        cursor!!.moveToFirst()
-        while (cursor.moveToNext()) {
-
-            val name = (cursor.getString(cursor.getColumnIndex(COLUMN_NAME)))
-            val email = (cursor.getString(cursor.getColumnIndex(COLUMN_EMAIL)))
-            val phone = (cursor.getString(cursor.getColumnIndex(COLUMN_PHONE)))
-            val userId = (cursor.getInt(cursor.getColumnIndex(COLUMN_USER)))
-            dependents.add(Dependent(name, email, phone, userId))
-        }
-        cursor.close()
+        dependents= repository.configuraDataBase(this, dependents)
         configuraLista(dependents)
 
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -78,7 +69,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         sensorManager.registerListener(this, acelerometer, SensorManager.SENSOR_DELAY_NORMAL)
     }
-
 
     private fun configuraBotaoAdicionar() {
         botao_novo_usuario.setOnClickListener {
@@ -98,11 +88,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent?) {
         if (event!=null)
-       // Log.d("SensorChange", "${event.values[1]}")
             if (event.values[1]>2.toFloat())
                 Log.d("sensor", "${event.values[1]}")
                 sendMessage()
-               // flag  = true
     }
 
     fun sendMessage(){
@@ -126,54 +114,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             MY_PERMISSIONS -> {
                 // If request is cancelled, the result arrays are empty.
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-                    locationListener=object:LocationListener{
-                        override fun onLocationChanged(location: Location?) {
-                            if (flag<10){
-                                latitude = location?.latitude
-                                Log.d("minhavovo","$latitude")
-                                longitude = location?.longitude
-                                if (!(latitude==0.0 || longitude ==0.0)) {
-                                    val smsManager = SmsManager.getDefault()
-                                    smsManager.sendTextMessage(
-                                        "11963125917",
-                                        null,
-                                        "testando o app $latitude $longitude ",
-                                        null,
-                                        null
-                                    )
-                                    smsManager.sendTextMessage(
-                                        "11977973346",
-                                        null,
-                                        "Vamos passar nessa bagaça $latitude $longitude",
-                                        null,
-                                        null
-                                    )
-                                    flag++
-                                }
-                            }
+                    getLocation()
 
-                        }
-
-                        override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
-
-                        }
-
-                        override fun onProviderEnabled(provider: String?) {
-                            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-                        }
-
-                        override fun onProviderDisabled(provider: String?) {
-                            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-                        }
-                    }
-                    if (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            checkSelfPermission(permissions.toString())!= PackageManager.PERMISSION_GRANTED
-                        } else {
-                            TODO("VERSION.SDK_INT < M")
-                        }
-                    )
-                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0f,locationListener)
 
                   Log.d("latitude", "$latitude")
 
@@ -190,5 +132,59 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
         }
     }
+
+    private fun getLocation() {
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        locationListener = object : LocationListener {
+            override fun onLocationChanged(location: Location?) {
+                    latitude = location?.latitude
+                    longitude = location?.longitude
+                    if (!(latitude == 0.0 || longitude == 0.0)) {
+                        if (flag < 2) {
+                        enviaMensagem()
+                        flag++
+                    }
+                }
+
+            }
+
+            override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
+
+            }
+
+            override fun onProviderEnabled(provider: String?) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onProviderDisabled(provider: String?) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+        }
+        if (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                checkSelfPermission(permissions.toString())!= PackageManager.PERMISSION_GRANTED
+            } else {
+                TODO("VERSION.SDK_INT < M")
+            }
+        )
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0f,locationListener)
     }
+
+    private fun enviaMensagem() {
+        val smsManager = SmsManager.getDefault()
+        smsManager.sendTextMessage(
+            "11963125917",
+            null,
+            "testando o app $latitude $longitude ",
+            null,
+            null
+        )
+        smsManager.sendTextMessage(
+            "11977973346",
+            null,
+            "Vamos passar nessa bagaça $latitude $longitude",
+            null,
+            null
+        )
+    }
+}
 

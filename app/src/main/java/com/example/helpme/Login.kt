@@ -7,7 +7,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import com.example.helpme.ui.activity.MainActivity
+import com.example.helpme.ui.activity.DashboardActivity
 import kotlinx.android.synthetic.main.activity_login.*
 
 class Login : AppCompatActivity() {
@@ -36,7 +36,7 @@ class Login : AppCompatActivity() {
         btLogin.setOnClickListener {
             val db = UserDatabase(this)
             if (db.readEmail(etEmailLogin.text.toString()) && db.readPassword(etPassword.text.toString())) {
-                val intent = Intent(this, MainActivity::class.java)
+                val intent = Intent(this, DashboardActivity::class.java)
                 startActivity(intent)
             } else {
                 Toast.makeText(this, "errrrrrrou", Toast.LENGTH_LONG).show()
