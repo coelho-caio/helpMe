@@ -140,7 +140,7 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener {
                     latitude = location?.latitude
                     longitude = location?.longitude
                     if (!(latitude == 0.0 || longitude == 0.0)) {
-                        if (flag < 2) {
+                        if (flag < 1) {
                         enviaMensagem()
                         flag++
                     }
