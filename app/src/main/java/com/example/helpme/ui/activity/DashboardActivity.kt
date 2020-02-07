@@ -14,10 +14,10 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.telephony.SmsManager
 import android.util.Log
 import com.example.helpme.Database.DatabaseHelpMe.DBHelpMe.COLUMN_EMAIL
@@ -47,7 +47,7 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener {
 
     private var dependents: MutableList<Dependent> = mutableListOf()
 
-    val repository: DashboardRepository= DashboardRepository()
+    val repository: DashboardRepository = DashboardRepository()
 
     private lateinit var sensorManager: SensorManager
     lateinit var acelerometer: Sensor
@@ -78,7 +78,8 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener {
     }
 
     private fun configuraLista(dependents: MutableList<Dependent>) {
-        lista_usuario_recyclerView.layoutManager = LinearLayoutManager(this)
+        lista_usuario_recyclerView.layoutManager =
+            LinearLayoutManager(this)
         lista_usuario_recyclerView.adapter = RecyclerAdapter(dependents)
 
     }

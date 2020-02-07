@@ -2,7 +2,7 @@ package com.example.helpme.ui.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import com.example.helpme.Database.DependentDatabase
 import com.example.helpme.R
 import com.example.helpme.model.Dependent
