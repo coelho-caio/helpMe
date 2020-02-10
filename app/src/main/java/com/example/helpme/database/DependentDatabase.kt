@@ -1,4 +1,4 @@
-package com.example.helpme.Database
+package com.example.helpme.database
 
 import android.content.ContentValues
 import android.content.Context
@@ -6,11 +6,11 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.provider.BaseColumns
-import com.example.helpme.Database.DatabaseHelpMe.DBHelpMe.COLUMN_EMAIL
-import com.example.helpme.Database.DatabaseHelpMe.DBHelpMe.COLUMN_NAME
-import com.example.helpme.Database.DatabaseHelpMe.DBHelpMe.COLUMN_PHONE
-import com.example.helpme.Database.DatabaseHelpMe.DBHelpMe.COLUMN_USER
-import com.example.helpme.Database.DatabaseHelpMe.DBHelpMe.TABLE_DEP
+import com.example.helpme.database.DatabaseHelpMe.DBHelpMe.COLUMN_EMAIL
+import com.example.helpme.database.DatabaseHelpMe.DBHelpMe.COLUMN_NAME
+import com.example.helpme.database.DatabaseHelpMe.DBHelpMe.COLUMN_PHONE
+import com.example.helpme.database.DatabaseHelpMe.DBHelpMe.COLUMN_USER
+import com.example.helpme.database.DatabaseHelpMe.DBHelpMe.TABLE_DEP
 import com.example.helpme.model.Dependent
 
 object DatabaseHelpMe {
@@ -29,7 +29,7 @@ private const val SQL_CREATE_ENTRIES = "CREATE TABLE $TABLE_DEP" +
         "$COLUMN_NAME TEXT," +
         "$COLUMN_EMAIL TEXT," +
         "$COLUMN_PHONE TEXT," +
-        "$COLUMN_USER INTEGER)"
+        "$COLUMN_USER TEXT)"
 
 private const val SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS $TABLE_DEP"
 

@@ -1,7 +1,7 @@
 package com.example.helpme.ui.activity
 
-import android.Manifest.permission.*
-import android.annotation.SuppressLint
+import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.Manifest.permission.SEND_SMS
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -14,20 +14,19 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
 import android.telephony.SmsManager
 import android.util.Log
-import com.example.helpme.Database.DatabaseHelpMe.DBHelpMe.COLUMN_EMAIL
-import com.example.helpme.Database.DatabaseHelpMe.DBHelpMe.COLUMN_NAME
-import com.example.helpme.Database.DatabaseHelpMe.DBHelpMe.COLUMN_PHONE
-import com.example.helpme.Database.DatabaseHelpMe.DBHelpMe.COLUMN_USER
-import com.example.helpme.Database.DependentDatabase
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.helpme.R
 import com.example.helpme.adapter.RecyclerAdapter
 import com.example.helpme.model.Dependent
+import com.example.helpme.ui.repository.DashboardRepository
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -46,8 +45,8 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener {
     private var longitude:Double?=0.0
 
     private var dependents: MutableList<Dependent> = mutableListOf()
-
-    val repository: DashboardRepository = DashboardRepository()
+    val repository: DashboardRepository =
+        DashboardRepository()
 
     private lateinit var sensorManager: SensorManager
     lateinit var acelerometer: Sensor
@@ -57,17 +56,39 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val mAuth = FirebaseAuth.getInstance()
+        var user = mAuth.currentUser
         setContentView(R.layout.activity_main)
+
+        if (user == null) {
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
         configuraBotaoAdicionar()
 
-        dependents= repository.configuraDataBase(this, dependents)
+//        dependents = repository.configuraDataBase(dependents, user)
+
+        val db = FirebaseFirestore.getInstance()
+
+        val documents = db.collection("dependents")
+            .whereEqualTo("userId", user!!.uid).get()
+
+        documents.addOnSuccessListener { result ->
+            for (document in result) {
+                val dependent = document.toObject(Dependent::class.java)
+                dependents.add(dependent)
+                Log.d("DashboardRepository", "${document.id} => ${document.data}")
+            }
         configuraLista(dependents)
+        }
 
-        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
 
-        acelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-
-        sensorManager.registerListener(this, acelerometer, SensorManager.SENSOR_DELAY_NORMAL)
+//        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+//
+//        acelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+//
+//        sensorManager.registerListener(this, acelerometer, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
     private fun configuraBotaoAdicionar() {

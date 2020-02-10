@@ -5,4 +5,5 @@ class User(
     val password : String
 ) {
 
+
 }

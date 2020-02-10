@@ -15,8 +15,8 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-        <activity android:name=".Register"></activity>
-        <activity android:name=".Login"></activity>
+        <activity android:name=".ui.activity.RegisterActivity"></activity>
+        <activity android:name=".ui.activity.LoginActivity"></activity>
         <activity android:name=".ui.activity.FormActivity"></activity>
         <activity android:name=".ui.activity.DashboardActivity">
             <intent-filter>

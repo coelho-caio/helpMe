@@ -1,9 +1,15 @@
 package com.example.helpme.model
 
-class Dependent(
-    val name: String,
-    val email: String,
-    val phone: String,
-    val userId : Int
-) {
+class Dependent() {
+    lateinit var name : String
+    lateinit var email : String
+    lateinit var phone : String
+    lateinit var userId : String
+
+    constructor(name: String, email: String, phone: String, userId: String) : this(){
+        this.name = name
+        this.email = email
+        this.phone = phone
+        this.userId = userId
+    }
 }
