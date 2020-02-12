@@ -64,24 +64,12 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener {
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
             finish()
+        }else{
+            configuraBotaoAdicionar()
+            configuraDependents(user!!.uid)
         }
-        configuraBotaoAdicionar()
 
 //        dependents = repository.configuraDataBase(dependents, user)
-
-        val db = FirebaseFirestore.getInstance()
-
-        val documents = db.collection("dependents")
-            .whereEqualTo("userId", user!!.uid).get()
-
-        documents.addOnSuccessListener { result ->
-            for (document in result) {
-                val dependent = document.toObject(Dependent::class.java)
-                dependents.add(dependent)
-                Log.d("DashboardRepository", "${document.id} => ${document.data}")
-            }
-        configuraLista(dependents)
-        }
 
 
 //        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -91,6 +79,22 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener {
 //        sensorManager.registerListener(this, acelerometer, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
+    private fun configuraDependents(userId : String) {
+        val db = FirebaseFirestore.getInstance()
+        val documents = db.collection("dependents")
+            .whereEqualTo("userId", userId).get()
+
+        documents.addOnSuccessListener { result ->
+            for (document in result) {
+                val dependent = document.toObject(Dependent::class.java)
+                dependents.add(dependent)
+                Log.d("DashboardRepository", "${document.id} => ${document.data}")
+            }
+        configuraLista(dependents)
+        }.addOnFailureListener { e ->
+            Log.w("DashboardActivty", "Error adding document", e)
+        }
+    }
     private fun configuraBotaoAdicionar() {
         botao_novo_usuario.setOnClickListener {
             val intent = Intent(this, FormActivity::class.java)
