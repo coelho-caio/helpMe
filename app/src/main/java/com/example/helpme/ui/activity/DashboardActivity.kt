@@ -16,21 +16,22 @@ import android.os.Build
 import android.os.Bundle
 import android.telephony.SmsManager
 import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.helpme.R
+import com.example.helpme.adapter.OnItemClickListener
 import com.example.helpme.adapter.RecyclerAdapter
 import com.example.helpme.model.Dependent
-import com.example.helpme.ui.repository.DashboardRepository
+import com.example.helpme.ui.repository.DependentRepository
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.activity_main.*
 
 
-class DashboardActivity : AppCompatActivity(), SensorEventListener {
+class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickListener {
+    private lateinit var mAuth: FirebaseAuth
+    private lateinit var adapter: RecyclerAdapter
 
     private val MY_PERMISSIONS:Int=21
     private val MY_PERMISSION_REQUEST_COARSE_LOCATION:Int=22
@@ -45,8 +46,7 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener {
     private var longitude:Double?=0.0
 
     private var dependents: MutableList<Dependent> = mutableListOf()
-    val repository: DashboardRepository =
-        DashboardRepository()
+    private val repository: DependentRepository = DependentRepository()
 
     private lateinit var sensorManager: SensorManager
     lateinit var acelerometer: Sensor
@@ -56,57 +56,65 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val mAuth = FirebaseAuth.getInstance()
-        var user = mAuth.currentUser
         setContentView(R.layout.activity_main)
+        sessionUser()
+//        setSensor()
+    }
+
+    private fun setSensor() {
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        acelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        sensorManager.registerListener(this, acelerometer, SensorManager.SENSOR_DELAY_NORMAL)
+    }
+
+    private fun sessionUser() {
+        mAuth = FirebaseAuth.getInstance()
+        val user = mAuth.currentUser
 
         if (user == null) {
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
             finish()
         }else{
-            configuraBotaoAdicionar()
-            configuraDependents(user!!.uid)
+            configureDependents(user.uid)
+            configureButtonAdd()
         }
-
-//        dependents = repository.configuraDataBase(dependents, user)
-
-
-//        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-//
-//        acelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-//
-//        sensorManager.registerListener(this, acelerometer, SensorManager.SENSOR_DELAY_NORMAL)
     }
 
-    private fun configuraDependents(userId : String) {
-        val db = FirebaseFirestore.getInstance()
-        val documents = db.collection("dependents")
-            .whereEqualTo("userId", userId).get()
-
-        documents.addOnSuccessListener { result ->
-            for (document in result) {
-                val dependent = document.toObject(Dependent::class.java)
-                dependents.add(dependent)
-                Log.d("DashboardRepository", "${document.id} => ${document.data}")
+    private fun configureDependents(userId : String) {
+        val documents = repository.getAll(userId)
+        documents.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                for (document in task.result!!) {
+                    val dependent = document.toObject(Dependent::class.java)
+                    dependents.add(dependent)
+                }
+                configureList(dependents)
             }
-        configuraLista(dependents)
         }.addOnFailureListener { e ->
-            Log.w("DashboardActivty", "Error adding document", e)
+            Log.w("Buscar Dependentes", "Erro ao buscar dependentes: ", e)
         }
     }
-    private fun configuraBotaoAdicionar() {
+
+    private fun configureButtonAdd() {
         botao_novo_usuario.setOnClickListener {
             val intent = Intent(this, FormActivity::class.java)
             startActivity(intent)
         }
     }
 
-    private fun configuraLista(dependents: MutableList<Dependent>) {
+    override fun onItemClicked(dependent: Dependent) {
+        val intent = Intent(this, FormActivity::class.java)
+        intent.putExtra("nameDependent", dependent.name)
+        intent.putExtra("phoneDependent", dependent.phone)
+        intent.putExtra("emailDependent", dependent.email)
+        startActivity(intent)
+    }
+
+    private fun configureList(dependents: MutableList<Dependent>) {
         lista_usuario_recyclerView.layoutManager =
             LinearLayoutManager(this)
-        lista_usuario_recyclerView.adapter = RecyclerAdapter(dependents)
-
+        lista_usuario_recyclerView.adapter = RecyclerAdapter(dependents,this)
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
@@ -119,7 +127,7 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener {
                 sendMessage()
     }
 
-    fun sendMessage(){
+    private fun sendMessage(){
         if (ContextCompat.checkSelfPermission(this, permissions.toString())!= PackageManager.PERMISSION_GRANTED){
             if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                     permissions.toString()
@@ -167,7 +175,7 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener {
                     longitude = location?.longitude
                     if (!(latitude == 0.0 || longitude == 0.0)) {
                         if (flag < 1) {
-                        enviaMensagem()
+                        sendMessageDependent()
                         flag++
                     }
                 }
@@ -195,7 +203,7 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0f,locationListener)
     }
 
-    private fun enviaMensagem() {
+    private fun sendMessageDependent() {
         val smsManager = SmsManager.getDefault()
         smsManager.sendTextMessage(
             "11963125917",

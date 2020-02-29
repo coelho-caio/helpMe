@@ -4,4 +4,6 @@
     <string name="email">email</string>
     <string name="nome">nome</string>
     <string name="adiciona">adiciona</string>
+    <string name="remover">remover</string>
+    <string name="editar">editar</string>
 </resources>
