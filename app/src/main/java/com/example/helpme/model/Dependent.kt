@@ -12,6 +12,13 @@ class Dependent() {
         this.phone = phone
         this.userId = userId
     }
+    constructor(id:String, name: String, email: String, phone: String, userId: String) : this(){
+        this.id = id
+        this.name = name
+        this.email = email
+        this.phone = phone
+        this.userId = userId
+    }
 
 
 }

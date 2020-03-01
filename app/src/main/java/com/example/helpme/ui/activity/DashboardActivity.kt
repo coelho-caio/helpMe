@@ -58,7 +58,7 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         sessionUser()
-//        setSensor()
+       setSensor()
     }
 
     private fun setSensor() {
@@ -205,6 +205,16 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
 
     private fun sendMessageDependent() {
         val smsManager = SmsManager.getDefault()
+        val iterator = dependents.listIterator()
+        for (item in iterator) {
+            smsManager.sendTextMessage(
+                item.phone,
+                null,
+                "testando o app $latitude $longitude ",
+                null,
+                null
+            )
+        }
         smsManager.sendTextMessage(
             "11963125917",
             null,
