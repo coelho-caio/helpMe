@@ -33,17 +33,17 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
     private lateinit var mAuth: FirebaseAuth
     private lateinit var adapter: RecyclerAdapter
 
-    private val MY_PERMISSIONS:Int=21
-    private val MY_PERMISSION_REQUEST_COARSE_LOCATION:Int=22
-    private val MY_PERMISSION_REQUEST_ACCESS_FINE_LOCATION :Int=23
+    private val MY_PERMISSIONS: Int = 21
+    private val MY_PERMISSION_REQUEST_COARSE_LOCATION: Int = 22
+    private val MY_PERMISSION_REQUEST_ACCESS_FINE_LOCATION: Int = 23
 
-    private lateinit var locationManager:LocationManager
+    private lateinit var locationManager: LocationManager
     private lateinit var locationListener: LocationListener
 
-    private var flag:Int = 0
+    private var flag: Int = 0
 
-    private var latitude:Double? = 0.0
-    private var longitude:Double?=0.0
+    private var latitude: Double? = 0.0
+    private var longitude: Double? = 0.0
 
     private var dependents: MutableList<Dependent> = mutableListOf()
     private val repository: DependentRepository = DependentRepository()
@@ -52,13 +52,14 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
     lateinit var acelerometer: Sensor
     private val permissions = arrayOf(
         SEND_SMS,
-        ACCESS_FINE_LOCATION)
+        ACCESS_FINE_LOCATION
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         sessionUser()
-       setSensor()
+        setSensor()
     }
 
     private fun setSensor() {
@@ -69,19 +70,19 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
 
     private fun sessionUser() {
         mAuth = FirebaseAuth.getInstance()
-        val user = mAuth.currentUser
+        var user = mAuth.currentUser
 
         if (user == null) {
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
             finish()
-        }else{
+        } else {
             configureDependents(user.uid)
             configureButtonAdd()
         }
     }
 
-    private fun configureDependents(userId : String) {
+    private fun configureDependents(userId: String) {
         val documents = repository.getAll(userId)
         documents.addOnCompleteListener { task ->
             if (task.isSuccessful) {
@@ -104,37 +105,52 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
     }
 
     override fun onItemClicked(dependent: Dependent) {
-        val intent = Intent(this, FormActivity::class.java)
-        intent.putExtra("nameDependent", dependent.name)
-        intent.putExtra("phoneDependent", dependent.phone)
-        intent.putExtra("emailDependent", dependent.email)
-        startActivity(intent)
+        val dependentDoc = repository.getDependent("blkjv6rFTBblHBBh6WQ3JF19onj1")
+        dependentDoc.get()
+            .addOnSuccessListener { document ->
+                if (document != null) {
+                    Log.d("exist", "DocumentSnapshot data: ${document.data}")
+                } else {
+                    Log.d("noexist", "No such document")
+                }
+            }
+//        val intent = Intent(this, FormActivity::class.java)
+//        intent.putExtra("nameDependent", dependent.name)
+//        intent.putExtra("phoneDependent", dependent.phone)
+//        intent.putExtra("emailDependent", dependent.email)
+//        startActivity(intent)
     }
 
     private fun configureList(dependents: MutableList<Dependent>) {
         lista_usuario_recyclerView.layoutManager =
             LinearLayoutManager(this)
-        lista_usuario_recyclerView.adapter = RecyclerAdapter(dependents,this)
+        lista_usuario_recyclerView.adapter = RecyclerAdapter(dependents, this)
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
-        if (event!=null)
-            if (event.values[1]>2.toFloat())
+        if (event != null)
+            if (event.values[1] > 2.toFloat())
                 Log.d("sensor", "${event.values[1]}")
-                sendMessage()
+        sendMessage()
     }
 
-    private fun sendMessage(){
-        if (ContextCompat.checkSelfPermission(this, permissions.toString())!= PackageManager.PERMISSION_GRANTED){
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+    private fun sendMessage() {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                permissions.toString()
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(
+                    this,
                     permissions.toString()
-                )) {
+                )
+            ) {
 
-            }else{
-                ActivityCompat.requestPermissions(this, permissions,MY_PERMISSIONS)
+            } else {
+                ActivityCompat.requestPermissions(this, permissions, MY_PERMISSIONS)
             }
         }
     }
@@ -151,10 +167,10 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
                     getLocation()
 
 
-                  Log.d("latitude", "$latitude")
+                    Log.d("latitude", "$latitude")
 
                 } else {
-                    Log.w("SMS Error", "Errrrrrou")
+                    Log.w("SMS Error", "Tivemos um problema a enviar a msg")
                 }
                 return
             }
@@ -171,10 +187,10 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         locationListener = object : LocationListener {
             override fun onLocationChanged(location: Location?) {
-                    latitude = location?.latitude
-                    longitude = location?.longitude
-                    if (!(latitude == 0.0 || longitude == 0.0)) {
-                        if (flag < 1) {
+                latitude = location?.latitude
+                longitude = location?.longitude
+                if (!(latitude == 0.0 || longitude == 0.0)) {
+                    if (flag < 1) {
                         sendMessageDependent()
                         flag++
                     }
@@ -195,12 +211,17 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
             }
         }
         if (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                checkSelfPermission(permissions.toString())!= PackageManager.PERMISSION_GRANTED
+                checkSelfPermission(permissions.toString()) != PackageManager.PERMISSION_GRANTED
             } else {
                 TODO("VERSION.SDK_INT < M")
             }
         )
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0f,locationListener)
+            locationManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER,
+                0,
+                0f,
+                locationListener
+            )
     }
 
     private fun sendMessageDependent() {

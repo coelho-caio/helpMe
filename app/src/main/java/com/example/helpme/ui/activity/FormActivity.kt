@@ -39,10 +39,10 @@ class FormActivity : AppCompatActivity() {
             val name = form_usuario_nome.text.toString()
             val phone = form_usuario_telefone.text.toString()
             val userId = userId
-            val dependent = Dependent(name, email, phone, userId)
+            dependent = Dependent(name, email, phone, userId)
 
             if (hasDependent) {
-                var docRef = db.collection("dependents").document("1KIAuXAEdjqQj7ZeC3GD")
+                var docRef = db.collection("dependents").document("blkjv6rFTBblHBBh6WQ3JF19onj1")
                 docRef.get()
                     .addOnSuccessListener { document ->
                         if (document != null) {
