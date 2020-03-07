@@ -132,9 +132,10 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
 
     override fun onSensorChanged(event: SensorEvent?) {
         if (event != null)
-            if (event.values[1] > 2.toFloat())
-                Log.d("sensor", "${event.values[1]}")
-        sendMessage()
+            if (event.values[1] > 12.toFloat()) {
+                Log.d("Thales monster", "${event.values[1]}")
+                sendMessage()
+            }
     }
 
     private fun sendMessage() {
@@ -236,7 +237,7 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
                 null
             )
         }
-        smsManager.sendTextMessage(
+        /*smsManager.sendTextMessage(
             "11963125917",
             null,
             "testando o app $latitude $longitude ",
@@ -249,7 +250,7 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
             "Vamos passar nessa bagaça $latitude $longitude",
             null,
             null
-        )
+        )*/
     }
 }
 
