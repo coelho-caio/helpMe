@@ -1,7 +1,6 @@
 package com.example.helpme.ui.activity
 
-import android.Manifest.permission.ACCESS_FINE_LOCATION
-import android.Manifest.permission.SEND_SMS
+import android.Manifest.permission.*
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -52,7 +51,9 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
     lateinit var acelerometer: Sensor
     private val permissions = arrayOf(
         SEND_SMS,
-        ACCESS_FINE_LOCATION
+        ACCESS_FINE_LOCATION,
+        ACCESS_NETWORK_STATE
+
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,12 +61,21 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
         setContentView(R.layout.activity_main)
         sessionUser()
         setSensor()
+        setListener()
+    }
+
+    private fun setListener() {
+        testeVibra.setOnClickListener {
+            val intent = Intent(this, AlertActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun setSensor() {
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         acelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         sensorManager.registerListener(this, acelerometer, SensorManager.SENSOR_DELAY_NORMAL)
+
     }
 
     private fun sessionUser() {
