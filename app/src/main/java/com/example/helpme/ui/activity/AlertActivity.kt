@@ -34,12 +34,12 @@ class AlertActivity : AppCompatActivity() {
 
     private fun setlisteners(vibrator: Vibrator) {
         bt_alert_yes.setOnClickListener {
-            disableAlert()
+            disableAlert(vibrator)
         }
     }
 
-    private fun disableAlert(): View.OnClickListener? {
-        //vibrator.cancel()
+    private fun disableAlert(vibrator: Vibrator): View.OnClickListener? {
+        vibrator.cancel()
         val intent = Intent(this, DashboardActivity::class.java)
         startActivity(intent)
         return null
