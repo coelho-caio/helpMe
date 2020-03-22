@@ -15,17 +15,24 @@ import android.os.Build
 import android.os.Bundle
 import android.telephony.SmsManager
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.helpme.Api
 import com.example.helpme.R
+import com.example.helpme.Utils.NetworkUtils
 import com.example.helpme.adapter.OnItemClickListener
 import com.example.helpme.adapter.RecyclerAdapter
 import com.example.helpme.model.Dependent
+import com.example.helpme.model.Fall
+import com.example.helpme.model.FallData
 import com.example.helpme.ui.repository.DependentRepository
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_main.*
+import retrofit2.Call
+import retrofit2.Response
 
 
 class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickListener {
@@ -69,6 +76,31 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
             val intent = Intent(this, AlertActivity::class.java)
             startActivity(intent)
         }
+        bt_dashboard_call_api.setOnClickListener {
+            getData()
+        }
+    }
+
+    private fun getData() {
+        val fallData = FallData()
+
+        val retrofitClient = NetworkUtils
+            .getRetrofitInstance("https://imaxinformatica.com.br/projetos/helpme/public/api/")
+
+        val api = retrofitClient.create(Api::class.java)
+        val callback = api.sendData(fallData)
+
+        callback.enqueue(object :  retrofit2.Callback<Fall> {
+            override fun onFailure(call: Call<Fall>, t: Throwable) {
+                Toast.makeText(this@DashboardActivity,"Falha na conexão", Toast.LENGTH_LONG).show()
+            }
+
+            override fun onResponse(call: Call<Fall>, response: Response<Fall>) {
+                Toast.makeText(this@DashboardActivity,"Conexão com sucesso", Toast.LENGTH_LONG).show()
+                Log.w("TCClindo",response.body().toString())
+            }
+
+        })
     }
 
     private fun setSensor() {
@@ -141,11 +173,26 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
-        if (event != null)
-            if (event.values[1] > 12.toFloat()) {
-                Log.d("Thales monster", "${event.values[1]}")
-                sendMessage()
-            }
+        if (event != null) {
+            var acelerate = calculateAcelerate(
+                event.values[0].toDouble(),
+                event.values[1].toDouble(),
+                event.values[2].toDouble()
+            )
+            Log.d("aceleracao", acelerate.toString())
+            Log.d("eixo x", event.values[0].toDouble().toString())
+            Log.d("eixo y", event.values[1].toDouble().toString())
+            Log.d("eixo z", event.values[2].toDouble().toString())
+            sendMessage()
+        }
+    }
+
+    private fun calculateAcelerate(x: Double, y: Double, z: Double) : Double {
+        val eixox=Math.pow(x,2.0)
+        val eixoy=Math.pow(y,2.0)
+        val eixoz=Math.pow(z,2.0)
+
+        return Math.sqrt(eixox+eixoy+eixoz)
     }
 
     private fun sendMessage() {

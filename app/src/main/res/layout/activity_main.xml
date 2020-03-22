@@ -31,4 +31,13 @@
             app:layout_constraintTop_toBottomOf="@+id/lista_usuario_recyclerView"
             app:layout_constraintStart_toStartOf="parent"/>
 
+    <Button
+            android:id="@+id/bt_dashboard_call_api"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="API"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/testeVibra"
+            />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
