@@ -1,6 +1,5 @@
-package com.example.helpme.ui.activity
+package com.example.helpme.activity
 
-import UserDatabase
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -9,7 +8,6 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import com.example.helpme.R
-import com.example.helpme.model.User
 import com.google.firebase.auth.FirebaseAuth
 
 class RegisterActivity : AppCompatActivity() {

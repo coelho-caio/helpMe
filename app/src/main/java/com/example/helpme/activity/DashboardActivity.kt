@@ -1,4 +1,4 @@
-package com.example.helpme.ui.activity
+package com.example.helpme.activity
 
 import android.Manifest.permission.*
 import android.content.Context
@@ -15,33 +15,41 @@ import android.os.Build
 import android.os.Bundle
 import android.telephony.SmsManager
 import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.helpme.Api
 import com.example.helpme.R
-import com.example.helpme.Utils.NetworkUtils
 import com.example.helpme.adapter.OnItemClickListener
 import com.example.helpme.adapter.RecyclerAdapter
+import com.example.helpme.business.DashboardBusiness
 import com.example.helpme.model.Dependent
-import com.example.helpme.model.Fall
-import com.example.helpme.model.FallData
-import com.example.helpme.ui.repository.DependentRepository
+import com.example.helpme.repository.DependentRepository
+import com.example.helpme.viewmodel.DashboardViewModel
+import com.example.helpme.viewmodel.ViewModelFactory
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_main.*
-import retrofit2.Call
-import retrofit2.Response
 
 
 class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickListener {
+
     private lateinit var mAuth: FirebaseAuth
     private lateinit var adapter: RecyclerAdapter
 
+    lateinit var viewModel : DashboardViewModel
+    lateinit var viewModelFactory: ViewModelFactory
+    val business: DashboardBusiness =
+        DashboardBusiness()
+
     private val MY_PERMISSIONS: Int = 21
-    private val MY_PERMISSION_REQUEST_COARSE_LOCATION: Int = 22
-    private val MY_PERMISSION_REQUEST_ACCESS_FINE_LOCATION: Int = 23
+
+    private var arrayeixoX = arrayListOf<String>()
+    private var arrayeixoY = arrayListOf<String>()
+    private var arrayeixoZ =arrayListOf<String>()
+    private var arrayAcelerate=arrayListOf<String>()
+
+    private var record = false
 
     private lateinit var locationManager: LocationManager
     private lateinit var locationListener: LocationListener
@@ -66,6 +74,9 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        viewModelFactory = ViewModelFactory(business)
+        viewModel = ViewModelProvider(this, viewModelFactory)
+            .get(DashboardViewModel::class.java)
         sessionUser()
         setSensor()
         setListener()
@@ -73,34 +84,14 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
 
     private fun setListener() {
         testeVibra.setOnClickListener {
-            val intent = Intent(this, AlertActivity::class.java)
-            startActivity(intent)
+            record =true
+            /*val intent = Intent(this, AlertActivity::class.java)
+            startActivity(intent)*/
         }
         bt_dashboard_call_api.setOnClickListener {
-            getData()
+          checkPermissions()
         }
-    }
 
-    private fun getData() {
-        val fallData = FallData()
-
-        val retrofitClient = NetworkUtils
-            .getRetrofitInstance("https://imaxinformatica.com.br/projetos/helpme/public/api/")
-
-        val api = retrofitClient.create(Api::class.java)
-        val callback = api.sendData(fallData)
-
-        callback.enqueue(object :  retrofit2.Callback<Fall> {
-            override fun onFailure(call: Call<Fall>, t: Throwable) {
-                Toast.makeText(this@DashboardActivity,"Falha na conexão", Toast.LENGTH_LONG).show()
-            }
-
-            override fun onResponse(call: Call<Fall>, response: Response<Fall>) {
-                Toast.makeText(this@DashboardActivity,"Conexão com sucesso", Toast.LENGTH_LONG).show()
-                Log.w("TCClindo",response.body().toString())
-            }
-
-        })
     }
 
     private fun setSensor() {
@@ -111,20 +102,19 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
     }
 
     private fun sessionUser() {
-        mAuth = FirebaseAuth.getInstance()
-        var user = mAuth.currentUser
+        val user = viewModel.checkUser()
 
         if (user == null) {
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
             finish()
         } else {
-            configureDependents(user.uid)
+            getDependents(user.uid)
             configureButtonAdd()
         }
     }
 
-    private fun configureDependents(userId: String) {
+    private fun getDependents(userId: String) {
         val documents = repository.getAll(userId)
         documents.addOnCompleteListener { task ->
             if (task.isSuccessful) {
@@ -132,10 +122,12 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
                     val dependent = document.toObject(Dependent::class.java)
                     dependents.add(dependent)
                 }
-                configureList(dependents)
+                //configureList(dependents)
             }
         }.addOnFailureListener { e ->
             Log.w("Buscar Dependentes", "Erro ao buscar dependentes: ", e)
+        }.addOnSuccessListener {
+            configureList(dependents)
         }
     }
 
@@ -147,55 +139,34 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
     }
 
     override fun onItemClicked(dependent: Dependent) {
-        val dependentDoc = repository.getDependent("blkjv6rFTBblHBBh6WQ3JF19onj1")
-        dependentDoc.get()
-            .addOnSuccessListener { document ->
-                if (document != null) {
-                    Log.d("exist", "DocumentSnapshot data: ${document.data}")
-                } else {
-                    Log.d("noexist", "No such document")
-                }
-            }
-//        val intent = Intent(this, FormActivity::class.java)
-//        intent.putExtra("nameDependent", dependent.name)
-//        intent.putExtra("phoneDependent", dependent.phone)
-//        intent.putExtra("emailDependent", dependent.email)
-//        startActivity(intent)
+        viewModel.editDependent(dependent)
     }
 
     private fun configureList(dependents: MutableList<Dependent>) {
-        lista_usuario_recyclerView.layoutManager =
-            LinearLayoutManager(this)
-        lista_usuario_recyclerView.adapter = RecyclerAdapter(dependents, this)
+            if (!dependents.isEmpty()) {
+                lista_usuario_recyclerView.layoutManager =
+                    LinearLayoutManager(this)
+                lista_usuario_recyclerView.adapter = RecyclerAdapter(dependents, this)
+        }
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
-        if (event != null) {
-            var acelerate = calculateAcelerate(
+        if (event != null && record) {
+            val acelerate = viewModel.calculerteAcelerate(
                 event.values[0].toDouble(),
                 event.values[1].toDouble(),
-                event.values[2].toDouble()
-            )
-            Log.d("aceleracao", acelerate.toString())
-            Log.d("eixo x", event.values[0].toDouble().toString())
-            Log.d("eixo y", event.values[1].toDouble().toString())
-            Log.d("eixo z", event.values[2].toDouble().toString())
-            sendMessage()
+                event.values[2].toDouble())
+
+            arrayAcelerate.add(acelerate.toString())
+            arrayeixoX.add(event.values[0].toDouble().toString())
+            arrayeixoY.add(event.values[1].toDouble().toString())
+            arrayeixoZ.add(event.values[2].toDouble().toString())
         }
     }
-
-    private fun calculateAcelerate(x: Double, y: Double, z: Double) : Double {
-        val eixox=Math.pow(x,2.0)
-        val eixoy=Math.pow(y,2.0)
-        val eixoz=Math.pow(z,2.0)
-
-        return Math.sqrt(eixox+eixoy+eixoz)
-    }
-
-    private fun sendMessage() {
+    private fun checkPermissions() {
         if (ContextCompat.checkSelfPermission(
                 this,
                 permissions.toString()
@@ -203,10 +174,12 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
         ) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(
                     this,
-                    permissions.toString()
-                )
+                    ACCESS_FINE_LOCATION) || ActivityCompat.shouldShowRequestPermissionRationale(
+                    this,
+                    SEND_SMS) ||ActivityCompat.shouldShowRequestPermissionRationale(
+                    this,
+                    ACCESS_NETWORK_STATE)
             ) {
-
             } else {
                 ActivityCompat.requestPermissions(this, permissions, MY_PERMISSIONS)
             }
@@ -217,26 +190,19 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
         requestCode: Int,
         permissions: Array<out String>,
         grantResults: IntArray
-    ) {
+    )
+    {
         when (requestCode) {
             MY_PERMISSIONS -> {
-                // If request is cancelled, the result arrays are empty.
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     getLocation()
-
-
                     Log.d("latitude", "$latitude")
-
                 } else {
                     Log.w("SMS Error", "Tivemos um problema a enviar a msg")
                 }
                 return
             }
-
-            // Add other 'when' lines to check for other
-            // permissions this app might request.
             else -> {
-                // Ignore all other requests.
             }
         }
     }
@@ -249,21 +215,17 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
                 longitude = location?.longitude
                 if (!(latitude == 0.0 || longitude == 0.0)) {
                     if (flag < 1) {
-                        sendMessageDependent()
+                        //sendMessageDependent()
                         flag++
                     }
                 }
-
             }
 
             override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
-
             }
-
             override fun onProviderEnabled(provider: String?) {
                 TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
             }
-
             override fun onProviderDisabled(provider: String?) {
                 TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
             }

@@ -18,14 +18,14 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".ui.activity.AlertActivity"
+            android:name="com.example.helpme.activity.AlertActivity"
             android:label="@string/title_activity_alert"
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
-        <activity android:name=".ui.activity.RegisterActivity" />
-        <activity android:name=".ui.activity.LoginActivity" />
-        <activity android:name=".ui.activity.FormActivity" />
-        <activity android:name=".ui.activity.DashboardActivity" >
+        <activity android:name="com.example.helpme.activity.RegisterActivity" />
+        <activity android:name="com.example.helpme.activity.LoginActivity" />
+        <activity android:name="com.example.helpme.activity.FormActivity" />
+        <activity android:name="com.example.helpme.activity.DashboardActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -1,4 +1,4 @@
-package com.example.helpme.ui.activity
+package com.example.helpme.activity
 
 import android.content.Intent
 import android.os.Bundle
