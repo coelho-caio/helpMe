@@ -34,13 +34,9 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickListener {
 
-    private lateinit var mAuth: FirebaseAuth
-    private lateinit var adapter: RecyclerAdapter
-
     lateinit var viewModel : DashboardViewModel
     lateinit var viewModelFactory: ViewModelFactory
-    val business: DashboardBusiness =
-        DashboardBusiness()
+    val business: DashboardBusiness = DashboardBusiness()
 
     private val MY_PERMISSIONS: Int = 21
 
@@ -60,7 +56,6 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
     private var longitude: Double? = 0.0
 
     private var dependents: MutableList<Dependent> = mutableListOf()
-    private val repository: DependentRepository = DependentRepository()
 
     private lateinit var sensorManager: SensorManager
     lateinit var acelerometer: Sensor
@@ -80,16 +75,25 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
         sessionUser()
         setSensor()
         setListener()
+        checkPermissions()
+        receiveIntents()
+    }
+
+    private fun receiveIntents() {
+        val bundle = intent.extras
+        if (bundle!=null){
+            val boolean = bundle.getBoolean("UserPassOut")
+            if (boolean){
+                getLocation()
+            }
+        }
     }
 
     private fun setListener() {
         testeVibra.setOnClickListener {
-            record =true
-            /*val intent = Intent(this, AlertActivity::class.java)
-            startActivity(intent)*/
         }
         bt_dashboard_call_api.setOnClickListener {
-          checkPermissions()
+
         }
 
     }
@@ -115,14 +119,13 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
     }
 
     private fun getDependents(userId: String) {
-        val documents = repository.getAll(userId)
+        val documents =viewModel.getDependents(userId)
         documents.addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 for (document in task.result!!) {
                     val dependent = document.toObject(Dependent::class.java)
                     dependents.add(dependent)
                 }
-                //configureList(dependents)
             }
         }.addOnFailureListener { e ->
             Log.w("Buscar Dependentes", "Erro ao buscar dependentes: ", e)
@@ -154,11 +157,16 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
-        if (event != null && record) {
+        if (event != null) {
             val acelerate = viewModel.calculerteAcelerate(
                 event.values[0].toDouble(),
                 event.values[1].toDouble(),
                 event.values[2].toDouble())
+
+            if (acelerate>2){
+                val intent = Intent(this, AlertActivity::class.java)
+                startActivity(intent)
+            }
 
             arrayAcelerate.add(acelerate.toString())
             arrayeixoX.add(event.values[0].toDouble().toString())
@@ -195,8 +203,6 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
         when (requestCode) {
             MY_PERMISSIONS -> {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    getLocation()
-                    Log.d("latitude", "$latitude")
                 } else {
                     Log.w("SMS Error", "Tivemos um problema a enviar a msg")
                 }
@@ -215,7 +221,8 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
                 longitude = location?.longitude
                 if (!(latitude == 0.0 || longitude == 0.0)) {
                     if (flag < 1) {
-                        //sendMessageDependent()
+                            sendMessageDependent()
+                        Log.w("testandoLAt", latitude.toString())
                         flag++
                     }
                 }
@@ -256,7 +263,7 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
                 null
             )
         }
-        /*smsManager.sendTextMessage(
+        smsManager.sendTextMessage(
             "11963125917",
             null,
             "testando o app $latitude $longitude ",
@@ -269,7 +276,7 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
             "Vamos passar nessa bagaça $latitude $longitude",
             null,
             null
-        )*/
+        )
     }
 }
 

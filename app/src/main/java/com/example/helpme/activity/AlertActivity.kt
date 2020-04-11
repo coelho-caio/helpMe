@@ -3,7 +3,6 @@ package com.example.helpme.activity
 import android.content.Context
 import android.content.Intent
 import android.os.*
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.example.helpme.R
@@ -27,14 +26,24 @@ class AlertActivity : AppCompatActivity() {
             }
 
             override fun onFinish() {
-                Log.w("timer","timer is done")
+               startDashboard()
             }
         }.start()
+    }
+
+    private fun startDashboard() {
+        val intentUserSituation = Intent(this, DashboardActivity::class.java)
+        intentUserSituation.putExtra("UserPassOut", true)
+        startActivity(intentUserSituation)
     }
 
     private fun setlisteners(vibrator: Vibrator) {
         bt_alert_yes.setOnClickListener {
             disableAlert(vibrator)
+            val intentUserSituation = Intent(this, DashboardActivity::class.java)
+            intentUserSituation.putExtra("UserPassOut", false)
+            startActivity(intentUserSituation)
+
         }
     }
 

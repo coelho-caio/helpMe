@@ -9,28 +9,6 @@ import com.example.helpme.R
 import com.example.helpme.model.Dependent
 import kotlinx.android.synthetic.main.item_usuario.view.*
 
-
-class DependentsViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
-
-    val name: TextView = view.item_usuario_nome
-    val email: TextView = view.item_usuario_email
-    val phone: TextView = view.item_usuario_telefone
-
-    fun bind(dependent: Dependent,clickListener: OnItemClickListener)
-    {
-        name.text = dependent.name
-        email.text = dependent.email
-        phone.text = dependent.phone
-
-        view.setOnClickListener {
-            clickListener.onItemClicked(dependent)
-        }
-    }
-//    private var btn_remove: Button = view.remove
-//    private var btn_edit: Button = view.edit
-
-}
-
 class RecyclerAdapter(var dependents: MutableList<Dependent>, private val itemClickListener : OnItemClickListener) :
     RecyclerView.Adapter<DependentsViewHolder>() {
 
@@ -51,5 +29,26 @@ class RecyclerAdapter(var dependents: MutableList<Dependent>, private val itemCl
 }
 interface OnItemClickListener{
     fun onItemClicked(dependent: Dependent)
-}
 
+
+}
+class DependentsViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
+
+    val name: TextView = view.item_usuario_nome
+    /*val email: TextView = view.item_usuario_email*/
+    val phone: TextView = view.item_usuario_telefone
+
+    fun bind(dependent: Dependent,clickListener: OnItemClickListener)
+    {
+        name.text = dependent.name
+        /*email.text = dependent.email*/
+        phone.text = dependent.phone
+
+        view.setOnClickListener {
+            clickListener.onItemClicked(dependent)
+        }
+    }
+//    private var btn_remove: Button = view.remove
+//    private var btn_edit: Button = view.edit
+
+}

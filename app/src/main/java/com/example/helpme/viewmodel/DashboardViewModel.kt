@@ -5,14 +5,15 @@ import androidx.lifecycle.ViewModel
 import com.example.helpme.model.Dependent
 import com.example.helpme.business.DashboardBusiness
 import com.example.helpme.repository.DependentRepository
+import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.QuerySnapshot
 
 class DashboardViewModel(business: DashboardBusiness) : ViewModel() {
 
     private val business = business
     private val repository = DependentRepository()
     var dependents: MutableList<Dependent> = mutableListOf()
-    var isDependentloaded =false
 
 
     fun calculerteAcelerate(x: Double, y: Double, z: Double): Double{
@@ -39,6 +40,11 @@ class DashboardViewModel(business: DashboardBusiness) : ViewModel() {
                     Log.d("noexist", "No such document")
                 }
             }
+    }
+
+    fun getDependents(userId: String): Task<QuerySnapshot> {
+       return repository.getAll(userId)
+
     }
 
 }

@@ -15,7 +15,7 @@ class DependentRepository {
     fun getAll(userId: String): Task<QuerySnapshot> {
 
 
-        return db.collection("dependents").get().addOnSuccessListener { result ->
+    return db.collection("dependents").whereEqualTo("userId",userId).get().addOnSuccessListener { result ->
             for (dependent in result) {
                 Log.w("${dependent.id}", "${dependent.data}")
                 /*val dependentString = dependent.data.toString()
