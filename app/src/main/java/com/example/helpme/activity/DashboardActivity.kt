@@ -25,10 +25,8 @@ import com.example.helpme.adapter.OnItemClickListener
 import com.example.helpme.adapter.RecyclerAdapter
 import com.example.helpme.business.DashboardBusiness
 import com.example.helpme.model.Dependent
-import com.example.helpme.repository.DependentRepository
 import com.example.helpme.viewmodel.DashboardViewModel
 import com.example.helpme.viewmodel.ViewModelFactory
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -91,11 +89,27 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
 
     private fun setListener() {
         testeVibra.setOnClickListener {
+            zeraArray()
         }
         bt_dashboard_call_api.setOnClickListener {
-
+            printaDados()
         }
 
+    }
+
+    private fun printaDados() {
+        Log.w("acelerecacao", "${arrayAcelerate}" )
+        Log.w("eixo x", "${arrayeixoX}")
+        Log.w("eixo y", "${arrayeixoY}")
+        Log.w("eixo z", "${arrayeixoZ}")
+
+    }
+
+    private fun zeraArray() {
+        arrayAcelerate.clear()
+        arrayeixoX.clear()
+        arrayeixoY.clear()
+        arrayeixoZ.clear()
     }
 
     private fun setSensor() {
@@ -163,7 +177,10 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
                 event.values[1].toDouble(),
                 event.values[2].toDouble())
 
-            if (acelerate>2){
+            if (acelerate<2.0){
+
+                Log.w("acelerecacao", acelerate.toString() )
+
                 val intent = Intent(this, AlertActivity::class.java)
                 startActivity(intent)
             }
@@ -277,6 +294,12 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
             null,
             null
         )
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        sensorManager.unregisterListener(this)
+
     }
 }
 

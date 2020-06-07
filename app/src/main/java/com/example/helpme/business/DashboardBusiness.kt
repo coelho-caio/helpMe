@@ -12,7 +12,7 @@ class DashboardBusiness: BaseBusiness {
         val eixoy=Math.pow(y,2.0)
         val eixoz=Math.pow(z,2.0)
 
-        return (Math.sqrt(eixox+eixoy+eixoz))/9.8
+        return (Math.sqrt(eixox+eixoy+eixoz))
     }
 
     fun checkUser(): FirebaseUser? {

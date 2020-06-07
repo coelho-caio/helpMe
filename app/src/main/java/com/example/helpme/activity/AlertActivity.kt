@@ -26,7 +26,7 @@ class AlertActivity : AppCompatActivity() {
             }
 
             override fun onFinish() {
-               startDashboard()
+               //startDashboard()
             }
         }.start()
     }
@@ -40,9 +40,7 @@ class AlertActivity : AppCompatActivity() {
     private fun setlisteners(vibrator: Vibrator) {
         bt_alert_yes.setOnClickListener {
             disableAlert(vibrator)
-            val intentUserSituation = Intent(this, DashboardActivity::class.java)
-            intentUserSituation.putExtra("UserPassOut", false)
-            startActivity(intentUserSituation)
+            startDashboard()
 
         }
     }
