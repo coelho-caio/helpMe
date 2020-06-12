@@ -11,8 +11,10 @@ import android.hardware.SensorManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
-import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.ResultReceiver
 import android.telephony.SmsManager
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -20,6 +22,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.helpme.Constants
+import com.example.helpme.FetchAddressIntentService
 import com.example.helpme.R
 import com.example.helpme.adapter.OnItemClickListener
 import com.example.helpme.adapter.RecyclerAdapter
@@ -27,6 +31,10 @@ import com.example.helpme.business.DashboardBusiness
 import com.example.helpme.model.Dependent
 import com.example.helpme.viewmodel.DashboardViewModel
 import com.example.helpme.viewmodel.ViewModelFactory
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -35,6 +43,10 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
     lateinit var viewModel : DashboardViewModel
     lateinit var viewModelFactory: ViewModelFactory
     val business: DashboardBusiness = DashboardBusiness()
+
+    var resultReceiver: ResultReceiver = addressResultReceiver( Handler())
+
+    private lateinit var locationCallback: LocationCallback
 
     private val MY_PERMISSIONS: Int = 21
 
@@ -70,6 +82,23 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
         viewModelFactory = ViewModelFactory(business)
         viewModel = ViewModelProvider(this, viewModelFactory)
             .get(DashboardViewModel::class.java)
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult?) {
+                super.onLocationResult(locationResult)
+                LocationServices.getFusedLocationProviderClient(this@DashboardActivity)
+                    .removeLocationUpdates(this)
+                    if (locationResult!=null && locationResult.locations.size>0){
+                        var latestLocationIndex = locationResult.locations.size -1
+                        var latitude =locationResult.locations.get(latestLocationIndex).latitude
+                        var longitude = locationResult.locations.get(latestLocationIndex).longitude
+
+                        var location =Location("providerNA")
+                        location.setLatitude(latitude)
+                        location.setLongitude(longitude)
+                        fetchAddressFromLatLong(location)
+                    }
+                }
+            }
         sessionUser()
         setSensor()
         setListener()
@@ -82,7 +111,7 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
         if (bundle!=null){
             val boolean = bundle.getBoolean("UserPassOut")
             if (boolean){
-                getLocation()
+                //
             }
         }
     }
@@ -92,7 +121,7 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
             zeraArray()
         }
         bt_dashboard_call_api.setOnClickListener {
-            printaDados()
+            getLocation()
         }
 
     }
@@ -231,13 +260,23 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
     }
 
     private fun getLocation() {
-        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val locationRequest = LocationRequest()
+        locationRequest.setInterval(10000)
+        locationRequest.setFastestInterval(3000)
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+
+        LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(locationRequest,locationCallback, Looper.getMainLooper())
+
+        /*locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         locationListener = object : LocationListener {
             override fun onLocationChanged(location: Location?) {
                 latitude = location?.latitude
                 longitude = location?.longitude
                 if (!(latitude == 0.0 || longitude == 0.0)) {
                     if (flag < 1) {
+                        if (location != null) {
+                            fetchAddressFromLatLong(location)
+                        }
                             sendMessageDependent()
                         Log.w("testandoLAt", latitude.toString())
                         flag++
@@ -265,7 +304,7 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
                 0,
                 0f,
                 locationListener
-            )
+            )*/
     }
 
     private fun sendMessageDependent() {
@@ -296,10 +335,28 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
         )
     }
 
+    fun fetchAddressFromLatLong(location: Location){
+         val intent = Intent(this, FetchAddressIntentService::class.java)
+        intent.putExtra(Constants.RECEIVER, resultReceiver)
+        intent.putExtra(Constants.LOCATION_DATA_EXTRAS, location)
+        startService(intent)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         sensorManager.unregisterListener(this)
 
+    }
+    class addressResultReceiver(handler: Handler) : ResultReceiver(handler) {
+
+        override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {
+            super.onReceiveResult(resultCode, resultData)
+            if (resultCode == Constants.RESULT_SUCESS){
+                Log.w("Favela",resultData?.getString(Constants.RESULT_DATA_KEY))
+            }else {
+                Log.w("Favela","deu ruim")
+            }
+        }
     }
 }
 
