@@ -1,19 +1,57 @@
 package com.example.helpme.activity
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.location.Location
 import android.os.*
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import com.example.helpme.Constants
+import com.example.helpme.FetchAddressIntentService
 import com.example.helpme.R
+import com.example.helpme.Utils.SendMessageUtils
+import com.example.helpme.model.Dependent
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
 import kotlinx.android.synthetic.main.activity_alert.*
 
 
 class AlertActivity : AppCompatActivity() {
 
+
+    private lateinit var locationCallback: LocationCallback
+    private  lateinit var dependents: ArrayList<Dependent>
+    private lateinit var resultReceiver :addressResultReceiver
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_alert)
+        val extra = intent.extras
+        if (extra!=null){
+            dependents = extra.getParcelableArrayList("dependente")
+        }
+        resultReceiver = addressResultReceiver( Handler(), dependents)
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult?) {
+                super.onLocationResult(locationResult)
+                LocationServices.getFusedLocationProviderClient(AlertActivity)
+                    .removeLocationUpdates(this)
+                if (locationResult!=null && locationResult.locations.size>0){
+                    var latestLocationIndex = locationResult.locations.size -1
+                    var latitude =locationResult.locations.get(latestLocationIndex).latitude
+                    var longitude = locationResult.locations.get(latestLocationIndex).longitude
+
+                    var location =Location("providerNA")
+                    location.setLatitude(latitude)
+                    location.setLongitude(longitude)
+                    fetchAddressFromLatLong(location)
+                }
+            }
+        }
         vibrate()
         startTimer()
     }
@@ -60,6 +98,39 @@ class AlertActivity : AppCompatActivity() {
             vibrator.vibrate(10000)
         }
         setlisteners(vibrator)
+    }
+
+    private fun getLocation() {
+        val locationRequest = LocationRequest()
+        locationRequest.setInterval(10000)
+        locationRequest.setFastestInterval(3000)
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+
+        LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(locationRequest,locationCallback, Looper.getMainLooper())
+    }
+
+
+    fun fetchAddressFromLatLong(location: Location){
+        val intent = Intent(this, FetchAddressIntentService::class.java)
+        intent.putExtra(Constants.RECEIVER, resultReceiver)
+        intent.putExtra(Constants.LOCATION_DATA_EXTRAS, location)
+        startService(intent)
+    }
+
+    class addressResultReceiver(handler: Handler, dependent: MutableList<Dependent>) : ResultReceiver(handler) {
+        val dependents = dependent
+
+        override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {
+            super.onReceiveResult(resultCode, resultData)
+            if (resultCode == Constants.RESULT_SUCESS){
+
+                val address = resultData?.getString(Constants.RESULT_DATA_KEY)
+                SendMessageUtils().sendMessageDependent(address, dependents)
+
+            }else {
+                Log.w("Favela","deu ruim")
+            }
+        }
     }
 
 }
