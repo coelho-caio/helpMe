@@ -7,7 +7,7 @@ class SendMessageUtils {
     fun sendMessageDependent(message: String?, dependents:MutableList<Dependent>) {
         val smsManager = SmsManager.getDefault()
         val iterator = dependents.listIterator()
-        for (item in iterator) {
+       /* for (item in iterator) {
             smsManager.sendTextMessage(
                 item.phone,
                 null,
@@ -15,7 +15,7 @@ class SendMessageUtils {
                 null,
                 null
             )
-        }
+        }*/
         smsManager.sendTextMessage(
             "11963125917",
             null,

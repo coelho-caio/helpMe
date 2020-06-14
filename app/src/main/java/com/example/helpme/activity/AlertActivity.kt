@@ -38,7 +38,7 @@ class AlertActivity : AppCompatActivity() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
                 super.onLocationResult(locationResult)
-                LocationServices.getFusedLocationProviderClient(AlertActivity)
+                LocationServices.getFusedLocationProviderClient(this@AlertActivity)
                     .removeLocationUpdates(this)
                 if (locationResult!=null && locationResult.locations.size>0){
                     var latestLocationIndex = locationResult.locations.size -1
@@ -64,7 +64,8 @@ class AlertActivity : AppCompatActivity() {
             }
 
             override fun onFinish() {
-               //startDashboard()
+               getLocation()
+                startDashboard()
             }
         }.start()
     }
