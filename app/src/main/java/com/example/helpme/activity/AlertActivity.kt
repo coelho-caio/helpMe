@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.*
+import android.telephony.SmsManager
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -26,10 +27,13 @@ class AlertActivity : AppCompatActivity() {
     private lateinit var locationCallback: LocationCallback
     private  lateinit var dependents: ArrayList<Dependent>
     private lateinit var resultReceiver :addressResultReceiver
+    lateinit var vibrator:Vibrator
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_alert)
+        vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         val extra = intent.extras
         if (extra!=null){
             dependents = extra.getParcelableArrayList("dependente")
@@ -65,7 +69,8 @@ class AlertActivity : AppCompatActivity() {
 
             override fun onFinish() {
                getLocation()
-                startDashboard()
+                disableAlert(vibrator)
+               startDashboard()
             }
         }.start()
     }
@@ -86,13 +91,10 @@ class AlertActivity : AppCompatActivity() {
 
     private fun disableAlert(vibrator: Vibrator): View.OnClickListener? {
         vibrator.cancel()
-        val intent = Intent(this, DashboardActivity::class.java)
-        startActivity(intent)
         return null
     }
 
     private fun vibrate() {
-        val vibrator:Vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             vibrator.vibrate(VibrationEffect.createOneShot(10000,VibrationEffect.DEFAULT_AMPLITUDE))
         }else{
@@ -126,7 +128,9 @@ class AlertActivity : AppCompatActivity() {
             if (resultCode == Constants.RESULT_SUCESS){
 
                 val address = resultData?.getString(Constants.RESULT_DATA_KEY)
-                SendMessageUtils().sendMessageDependent(address, dependents)
+                SendMessageUtils().sendMessageDependent(address,dependents)
+
+
 
             }else {
                 Log.w("Favela","deu ruim")

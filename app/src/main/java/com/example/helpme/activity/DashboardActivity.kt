@@ -51,10 +51,24 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
         viewModelFactory = ViewModelFactory(business)
         viewModel = ViewModelProvider(this, viewModelFactory)
             .get(DashboardViewModel::class.java)
-
+        setlistener()
         sessionUser()
         checkPermissions()
         receiveIntents()
+    }
+
+    private fun setlistener() {
+        bt_dashboard_call_api.setOnClickListener {
+/*
+            sensorManager.unregisterListener(this)
+*/
+
+           Log.w("aceleracao", arrayAcelerate.toString())
+        }
+        testeVibra.setOnClickListener {
+
+            arrayAcelerate.clear()
+        }
     }
 
     private fun receiveIntents() {
@@ -138,9 +152,11 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
 
                 Log.w("acelerecacao", acelerate.toString() )
 
-                val intent = Intent(this, AlertActivity::class.java)
+                sensorManager.unregisterListener(this)
+
+                /*val intent = Intent(this, AlertActivity::class.java)
                 intent.putExtra("dependente",dependents)
-                startActivity(intent)
+                startActivity(intent)*/
             }
 
             arrayAcelerate.add(acelerate.toString())
