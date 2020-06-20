@@ -13,6 +13,7 @@ import com.example.helpme.FetchAddressIntentService
 import com.example.helpme.R
 import com.example.helpme.Utils.SendMessageUtils
 import com.example.helpme.model.Dependent
+import com.example.helpme.model.DependentFromFirebase
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -24,12 +25,15 @@ class AlertActivity : AppCompatActivity() {
 
 
     private lateinit var locationCallback: LocationCallback
-    private  lateinit var dependents: ArrayList<Dependent>
+    private  lateinit var dependents: ArrayList<DependentFromFirebase>
     private lateinit var resultReceiver :addressResultReceiver
+    lateinit var vibrator:Vibrator
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_alert)
+        vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         val extra = intent.extras
         if (extra!=null){
             dependents = extra.getParcelableArrayList("dependente")
@@ -65,7 +69,8 @@ class AlertActivity : AppCompatActivity() {
 
             override fun onFinish() {
                getLocation()
-                startDashboard()
+                disableAlert(vibrator)
+               startDashboard()
             }
         }.start()
     }
@@ -86,13 +91,10 @@ class AlertActivity : AppCompatActivity() {
 
     private fun disableAlert(vibrator: Vibrator): View.OnClickListener? {
         vibrator.cancel()
-        val intent = Intent(this, DashboardActivity::class.java)
-        startActivity(intent)
         return null
     }
 
     private fun vibrate() {
-        val vibrator:Vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             vibrator.vibrate(VibrationEffect.createOneShot(10000,VibrationEffect.DEFAULT_AMPLITUDE))
         }else{
@@ -118,7 +120,7 @@ class AlertActivity : AppCompatActivity() {
         startService(intent)
     }
 
-    class addressResultReceiver(handler: Handler, dependent: MutableList<Dependent>) : ResultReceiver(handler) {
+    class addressResultReceiver(handler: Handler, dependent: MutableList<DependentFromFirebase>) : ResultReceiver(handler) {
         val dependents = dependent
 
         override fun onReceiveResult(resultCode: Int, resultData: Bundle?) {

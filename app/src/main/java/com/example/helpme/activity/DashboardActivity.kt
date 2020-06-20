@@ -20,6 +20,7 @@ import com.example.helpme.adapter.OnItemClickListener
 import com.example.helpme.adapter.RecyclerAdapter
 import com.example.helpme.business.DashboardBusiness
 import com.example.helpme.model.Dependent
+import com.example.helpme.model.DependentFromFirebase
 import com.example.helpme.viewmodel.DashboardViewModel
 import com.example.helpme.viewmodel.ViewModelFactory
 import kotlinx.android.synthetic.main.activity_main.*
@@ -34,7 +35,7 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
     private val MY_PERMISSIONS: Int = 21
     private var arrayAcelerate=arrayListOf<String>()
 
-    private var dependents: ArrayList<Dependent> = ArrayList()
+    private var dependents: ArrayList<DependentFromFirebase> = ArrayList()
 
     private lateinit var sensorManager: SensorManager
     lateinit var acelerometer: Sensor
@@ -55,6 +56,7 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
         sessionUser()
         checkPermissions()
         receiveIntents()
+        configureButtonAdd()
     }
 
     private fun receiveIntents() {
@@ -69,6 +71,7 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
      fun setSensor() {
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         acelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+         Log.w("sensor"," sensor ligado")
         sensorManager.registerListener(this, acelerometer, SensorManager.SENSOR_DELAY_NORMAL)
 
     }
@@ -82,17 +85,21 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
             finish()
         } else {
             getDependents(user.uid)
-            configureButtonAdd()
+
         }
     }
 
     private fun getDependents(userId: String) {
-        val documents =viewModel.getDependents(userId)
+        dependents.clear()
+        val documents = viewModel.getDependents(userId)
         documents.addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 for (document in task.result!!) {
-                    val dependent = document.toObject(Dependent::class.java)
-                    dependents.add(dependent)
+                    val dependentFromFirebase = DependentFromFirebase(
+                        document.id,
+                        document.toObject(Dependent::class.java)
+                    )
+                    dependents.add(dependentFromFirebase)
                     setSensor()
 
 
@@ -112,16 +119,15 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
         }
     }
 
-    override fun onItemClicked(dependent: Dependent) {
-        viewModel.editDependent(dependent)
+    override fun onItemClicked(id: String?) {
+        viewModel.deleteDependent(id)?.addOnSuccessListener { sessionUser() }
+
     }
 
-    private fun configureList(dependents: MutableList<Dependent>) {
-            if (!dependents.isEmpty()) {
+    private fun configureList(dependents: MutableList<DependentFromFirebase>) {
                 lista_usuario_recyclerView.layoutManager =
                     LinearLayoutManager(this)
                 lista_usuario_recyclerView.adapter = RecyclerAdapter(dependents, this)
-        }
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
@@ -138,9 +144,13 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
 
                 Log.w("acelerecacao", acelerate.toString() )
 
+                Log.w("sensor ","sensor desligado")
+                sensorManager.unregisterListener(this)
+
                 val intent = Intent(this, AlertActivity::class.java)
                 intent.putExtra("dependente",dependents)
                 startActivity(intent)
+
             }
 
             arrayAcelerate.add(acelerate.toString())
@@ -187,6 +197,7 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
 
     override fun onDestroy() {
         super.onDestroy()
+        Log.w("sensor ","sensor desligado")
         sensorManager.unregisterListener(this)
 
     }

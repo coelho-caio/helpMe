@@ -7,9 +7,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.helpme.R
 import com.example.helpme.model.Dependent
+import com.example.helpme.model.DependentFromFirebase
 import kotlinx.android.synthetic.main.item_usuario.view.*
 
-class RecyclerAdapter(var dependents: MutableList<Dependent>, private val itemClickListener : OnItemClickListener) :
+class RecyclerAdapter(var dependents: MutableList<DependentFromFirebase>, private val itemClickListener : OnItemClickListener) :
     RecyclerView.Adapter<DependentsViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, position: Int): DependentsViewHolder {
@@ -28,7 +29,7 @@ class RecyclerAdapter(var dependents: MutableList<Dependent>, private val itemCl
     }
 }
 interface OnItemClickListener{
-    fun onItemClicked(dependent: Dependent)
+    fun onItemClicked(id: String?)
 
 
 }
@@ -38,14 +39,14 @@ class DependentsViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
     /*val email: TextView = view.item_usuario_email*/
     val phone: TextView = view.item_usuario_telefone
 
-    fun bind(dependent: Dependent,clickListener: OnItemClickListener)
+    fun bind(dependentFromFirebase: DependentFromFirebase,clickListener: OnItemClickListener)
     {
-        name.text = dependent.name
+        name.text = dependentFromFirebase.dependent?.name
         /*email.text = dependent.email*/
-        phone.text = dependent.phone
+        phone.text = dependentFromFirebase.dependent?.phone
 
-        view.setOnClickListener {
-            clickListener.onItemClicked(dependent)
+        view.bt_dashboard_delete.setOnClickListener {
+            clickListener.onItemClicked(dependentFromFirebase.key)
         }
     }
 //    private var btn_remove: Button = view.remove

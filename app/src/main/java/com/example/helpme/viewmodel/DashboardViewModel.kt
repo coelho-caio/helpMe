@@ -30,21 +30,17 @@ class DashboardViewModel(business: DashboardBusiness) : ViewModel() {
         return isDependentloaded
     }
 
-    fun editDependent(dependent: Dependent){
-        val dependentDoc = repository.getDependent("blkjv6rFTBblHBBh6WQ3JF19onj1")
-        dependentDoc.get()
-            .addOnSuccessListener { document ->
-                if (document != null) {
-                    Log.d("exist", "DocumentSnapshot data: ${document.data}")
-                } else {
-                    Log.d("noexist", "No such document")
-                }
-            }
+    fun deleteDependent(dependenteId: String?): Task<Void>? {
+        if (dependenteId!=null) {
+            return repository.getDependent(dependenteId).delete()
+        }
+        return null
     }
 
     fun getDependents(userId: String): Task<QuerySnapshot> {
        return repository.getAll(userId)
 
     }
+
 
 }
