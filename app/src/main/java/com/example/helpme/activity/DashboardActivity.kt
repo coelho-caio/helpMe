@@ -33,7 +33,7 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
     val business: DashboardBusiness = DashboardBusiness()
 
     private val MY_PERMISSIONS: Int = 21
-    private var arrayAcelerate=arrayListOf<String>()
+    private var arrayAcelerate=arrayListOf<Double>()
 
     private var dependents: ArrayList<DependentFromFirebase> = ArrayList()
 
@@ -134,26 +134,36 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
-        if (event != null) {
+        if (event != null ) {
             val acelerate = viewModel.calculerteAcelerate(
                 event.values[0].toDouble(),
                 event.values[1].toDouble(),
-                event.values[2].toDouble())
+                event.values[2].toDouble()
+            )
 
-            if (acelerate<2.0){
+            arrayAcelerate.add(acelerate)
 
-                Log.w("acelerecacao", acelerate.toString() )
+            if (arrayAcelerate.size>299){
 
-                Log.w("sensor ","sensor desligado")
-                sensorManager.unregisterListener(this)
+                for (i in 0 until arrayAcelerate.size) {
+                    if (arrayAcelerate.get(i)<0.4){
+                        Log.w("primeira validacao ", arrayAcelerate.toString() )
+                        for (j in i until arrayAcelerate.size)
+                        if (arrayAcelerate.get(i)>2.0){
+                            Log.w("deu certo ", "VALIDACOES OK")
+                            sensorManager.unregisterListener(this)
 
-                val intent = Intent(this, AlertActivity::class.java)
-                intent.putExtra("dependente",dependents)
-                startActivity(intent)
+                            val intent = Intent(this, AlertActivity::class.java)
+                            intent.putExtra("dependente", dependents)
+                            startActivity(intent)
+                        }
+                    }
 
+                }
+
+                arrayAcelerate.removeAt(0)
             }
 
-            arrayAcelerate.add(acelerate.toString())
         }
     }
     private fun checkPermissions() {
