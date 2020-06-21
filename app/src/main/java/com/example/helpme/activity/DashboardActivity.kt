@@ -146,10 +146,10 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
             if (arrayAcelerate.size>299){
 
                 for (i in 0 until arrayAcelerate.size) {
-                    if (arrayAcelerate.get(i)<0.4){
+                    if (arrayAcelerate.get(0)<0.5){
                         Log.w("primeira validacao ", arrayAcelerate.toString() )
-                        for (j in i until arrayAcelerate.size)
-                        if (arrayAcelerate.get(i)>2.0){
+                        for (j in 0 until arrayAcelerate.size)
+                        if (arrayAcelerate.get(j)>2.0){
                             Log.w("deu certo ", "VALIDACOES OK")
                             sensorManager.unregisterListener(this)
 
