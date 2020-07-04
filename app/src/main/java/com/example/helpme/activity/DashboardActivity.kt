@@ -31,6 +31,9 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
     lateinit var viewModel : DashboardViewModel
     lateinit var viewModelFactory: ViewModelFactory
     val business: DashboardBusiness = DashboardBusiness()
+    var validou =true
+    var shock = false
+    var fall = false
 
     private val MY_PERMISSIONS: Int = 21
     private var arrayAcelerate=arrayListOf<Double>()
@@ -57,6 +60,12 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
         checkPermissions()
         receiveIntents()
         configureButtonAdd()
+        Log.w("andre" ,
+                " criou Dashboard")
+        if (arrayAcelerate.isNotEmpty()){
+            Log.w("sujeira", arrayAcelerate.toString() )
+        }
+
     }
 
     private fun receiveIntents() {
@@ -115,6 +124,7 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
     private fun configureButtonAdd() {
         botao_novo_usuario.setOnClickListener {
             val intent = Intent(this, FormActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             startActivity(intent)
         }
     }
@@ -143,24 +153,34 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
 
             arrayAcelerate.add(acelerate)
 
-            if (arrayAcelerate.size>299){
+            if (arrayAcelerate.size>120){
 
                 for (i in 0 until arrayAcelerate.size) {
-                    if (arrayAcelerate.get(i)<0.4){
-                        Log.w("primeira validacao ", arrayAcelerate.toString() )
-                        for (j in i until arrayAcelerate.size)
-                        if (arrayAcelerate.get(j)>2.0){
-                            Log.w("deu certo ", "VALIDACOES OK")
-                            sensorManager.unregisterListener(this)
+                    if (arrayAcelerate.get(i)<0.4 && validou ) {
+                        fall =true
+                        shock = false
+                        for (j in i until arrayAcelerate.size) {
+                            if (arrayAcelerate.get(j) > 2.0 && validou) {
+                                shock = true
+                                Log.w("first validacao ", arrayAcelerate.get(i).toString())
+                                Log.w("segunda validacao ", arrayAcelerate.get(j).toString())
+                                Log.w("shock val ", shock.toString())
+                                Log.w("fall val ", fall.toString())
 
-                            val intent = Intent(this, AlertActivity::class.java)
-                            intent.putExtra("dependente", dependents)
-                            startActivity(intent)
+                                sensorManager.unregisterListener(this)
+
+                                val intent = Intent(this, AlertActivity::class.java)
+                                intent.putExtra("dependente", dependents)
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                                startActivity(intent)
+                                validou = false
+                                finish()
+                            }
                         }
                     }
 
                 }
-
+                fall = false
                 arrayAcelerate.removeAt(0)
             }
 
@@ -207,6 +227,8 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
 
     override fun onDestroy() {
         super.onDestroy()
+        Log.w("andre" ,
+        " fechou Dashboard")
         Log.w("sensor ","sensor desligado")
         sensorManager.unregisterListener(this)
 

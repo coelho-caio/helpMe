@@ -61,8 +61,7 @@ class FormActivity : AppCompatActivity() {
                     }
             }
 
-            val intent = Intent(this, DashboardActivity::class.java)
-            startActivity(intent)
+           onBackPressed()
         }
 
     }
@@ -88,5 +87,12 @@ class FormActivity : AppCompatActivity() {
         form_usuario_nome.setText(name)
         form_usuario_telefone.setText(phone)
 
+    }
+
+    override fun onBackPressed() {
+        val intentUserSituation = Intent(this, DashboardActivity::class.java)
+        intentUserSituation.putExtra("UserPassOut", true)
+        intentUserSituation.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        startActivity(intentUserSituation)
     }
 }

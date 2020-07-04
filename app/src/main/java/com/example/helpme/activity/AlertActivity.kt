@@ -1,6 +1,5 @@
 package com.example.helpme.activity
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.location.Location
@@ -12,7 +11,6 @@ import com.example.helpme.Constants
 import com.example.helpme.FetchAddressIntentService
 import com.example.helpme.R
 import com.example.helpme.Utils.SendMessageUtils
-import com.example.helpme.model.Dependent
 import com.example.helpme.model.DependentFromFirebase
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -27,6 +25,7 @@ class AlertActivity : AppCompatActivity() {
     private lateinit var locationCallback: LocationCallback
     private  lateinit var dependents: ArrayList<DependentFromFirebase>
     private lateinit var resultReceiver :addressResultReceiver
+    var isPressedButton = false
     lateinit var vibrator:Vibrator
 
 
@@ -58,6 +57,7 @@ class AlertActivity : AppCompatActivity() {
         }
         vibrate()
         startTimer()
+        Log.w("andre","criou alert")
     }
 
     private fun startTimer() {
@@ -68,30 +68,37 @@ class AlertActivity : AppCompatActivity() {
             }
 
             override fun onFinish() {
-               getLocation()
-                disableAlert(vibrator)
-               startDashboard()
+                if (!isPressedButton) {
+                    getLocation()
+                    vibrator.cancel()
+                    tv_alert_timer.setText("mensagem enviada")
+                    tv_alert_are_u_okay.visibility = View.GONE
+                    bt_alert_yes.visibility = View.GONE
+                    bt_alert_back.visibility = View.VISIBLE
+                }
+
             }
         }.start()
     }
 
-    private fun startDashboard() {
+    private fun finishThisActivity() {
+        vibrator.cancel()
         val intentUserSituation = Intent(this, DashboardActivity::class.java)
         intentUserSituation.putExtra("UserPassOut", true)
         startActivity(intentUserSituation)
+        finish()
     }
 
     private fun setlisteners(vibrator: Vibrator) {
         bt_alert_yes.setOnClickListener {
-            disableAlert(vibrator)
-            startDashboard()
+            isPressedButton = true
+            vibrator.cancel()
+            finishThisActivity()
 
         }
-    }
-
-    private fun disableAlert(vibrator: Vibrator): View.OnClickListener? {
-        vibrator.cancel()
-        return null
+        bt_alert_back.setOnClickListener{
+            finishThisActivity()
+        }
     }
 
     private fun vibrate() {
@@ -118,6 +125,20 @@ class AlertActivity : AppCompatActivity() {
         intent.putExtra(Constants.RECEIVER, resultReceiver)
         intent.putExtra(Constants.LOCATION_DATA_EXTRAS, location)
         startService(intent)
+    }
+
+    override fun onBackPressed() {
+        isPressedButton = true
+        val intentUserSituation = Intent(this, DashboardActivity::class.java)
+        intentUserSituation.putExtra("UserPassOut", true)
+        intentUserSituation.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        startActivity(intentUserSituation)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.w("andre" ,
+            " fechou Alert")
     }
 
     class addressResultReceiver(handler: Handler, dependent: MutableList<DependentFromFirebase>) : ResultReceiver(handler) {
