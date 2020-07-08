@@ -159,9 +159,17 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
                     if (arrayAcelerate.get(i)<0.4 && validou ) {
                         fall =true
                         shock = false
+                        var contador = 0
                         for (j in i until arrayAcelerate.size) {
                             if (arrayAcelerate.get(j) > 2.0 && validou) {
                                 shock = true
+                            }
+                            if (arrayAcelerate.get(j)>0.8 && arrayAcelerate.get(j)<1.3){
+                                contador++
+                            }else{
+                                contador=0
+                            }
+                            if (shock && fall && contador==10) {
                                 Log.w("first validacao ", arrayAcelerate.get(i).toString())
                                 Log.w("segunda validacao ", arrayAcelerate.get(j).toString())
                                 Log.w("shock val ", shock.toString())
@@ -176,6 +184,7 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
                                 validou = false
                                 finish()
                             }
+
                         }
                     }
 
