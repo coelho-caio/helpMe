@@ -164,7 +164,7 @@ class DashboardActivity : AppCompatActivity(), SensorEventListener, OnItemClickL
                             if (arrayAcelerate.get(j) > 2.0 && validou) {
                                 shock = true
                             }
-                            if (arrayAcelerate.get(j)>0.8 && arrayAcelerate.get(j)<1.3){
+                            if (shock && arrayAcelerate.get(j)>0.8 && arrayAcelerate.get(j)<1.3){
                                 contador++
                             }else{
                                 contador=0
